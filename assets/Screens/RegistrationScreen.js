@@ -13,8 +13,8 @@ import {
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import BackgroundImg from "../background.png";
-import CloseSVG from "./closeSVG";
-import AddSVG from "./addSVG";
+import CloseSVG from "../closeSVG";
+import AddSVG from "../addSVG";
 
 const RegistrationScreen = () => {
   const [image, setImage] = useState(null);
