@@ -12,19 +12,14 @@ import {
   KeyboardAvoidingView,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
-import BackgroundImg from "../background.png";
-import CloseSVG from "../closeSVG";
-import AddSVG from "../addSVG";
+import BackgroundImg from "../img/background.png";
+import { AntDesign } from "@expo/vector-icons";
 
 const RegistrationScreen = () => {
   const [image, setImage] = useState(null);
   const [hidePassword, setHidePassword] = useState(true);
 
-  const [inputFocus, setInputFocus] = useState({
-    username: { backgroundColor: "#F6F6F6", borderColor: "#E8E8E8" },
-    email: { backgroundColor: "#F6F6F6", borderColor: "#E8E8E8" },
-    password: { backgroundColor: "#F6F6F6", borderColor: "#E8E8E8" },
-  });
+  const [inputFocus, setInputFocus] = useState({});
 
   const managePasswordVisibility = () => {
     setHidePassword(!hidePassword);
@@ -69,9 +64,13 @@ const RegistrationScreen = () => {
   console.log(image);
 
   return (
-    <ImageBackground source={BackgroundImg} style={styles.image}>
+    <ImageBackground
+      source={BackgroundImg}
+      style={styles.background}
+      resizeMethod="resize"
+    >
       <KeyboardAvoidingView
-        behavior={"height"}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
         keyboardVerticalOffset={-147}
         style={styles.containerKeyBoard}
       >
@@ -87,15 +86,31 @@ const RegistrationScreen = () => {
                 )}
               </View>
               {image ? (
-                <Pressable onPress={removeImage} style={styles.avatarBtn}>
+                <Pressable
+                  onPress={removeImage}
+                  style={({ pressed }) => [
+                    styles.avatarBtn,
+                    {
+                      backgroundColor: pressed ? "#F6F6F6" : "#FFFFFF",
+                    },
+                  ]}
+                >
                   <View style={styles.svgContainer}>
-                    <CloseSVG />
+                    <AntDesign name="closecircleo" size={25} color="#BDBDBD" />
                   </View>
                 </Pressable>
               ) : (
-                <Pressable onPress={pickImage} style={styles.avatarBtn}>
+                <Pressable
+                  onPress={pickImage}
+                  style={({ pressed }) => [
+                    styles.avatarBtn,
+                    {
+                      backgroundColor: pressed ? "#F6F6F6" : "#FFFFFF",
+                    },
+                  ]}
+                >
                   <View style={styles.svgContainer}>
-                    <AddSVG />
+                    <AntDesign name="pluscircleo" size={25} color="#FF6C00" />
                   </View>
                 </Pressable>
               )}
@@ -130,21 +145,27 @@ const RegistrationScreen = () => {
                   onPress={() => managePasswordVisibility()}
                   style={styles.hideBtn}
                 >
-                  {hidePassword ? (
-                    <Text style={styles.hideBtnText}>Show</Text>
-                  ) : (
-                    <Text style={styles.hideBtnText}>Hide</Text>
-                  )}
+                  <Text style={styles.hideBtnText}>
+                    {hidePassword ? "Show" : "Hide"}
+                  </Text>
                 </TouchableOpacity>
               </View>
-              <Pressable style={styles.primaryBtn}>
+              <Pressable
+                style={({ pressed }) => [
+                  styles.primaryBtn,
+                  {
+                    backgroundColor: pressed ? "#ff6a00ab" : "#FF6C00",
+                  },
+                ]}
+              >
                 <Text style={styles.btnText}>{"Sign up"}</Text>
               </Pressable>
-              <View style={styles.secTxtWrap}>
-                <Text style={styles.secText}>Already have an account? </Text>
+              <View>
                 <TouchableOpacity
+                  style={styles.secTxtWrap}
                   onPress={() => console.log("go to login screen function")}
                 >
+                  <Text style={styles.secText}>Already have an account? </Text>
                   <Text style={[styles.secText, styles.underlined]}>
                     Sign in
                   </Text>
@@ -171,12 +192,11 @@ const styles = StyleSheet.create({
     paddingTop: 92,
     paddingBottom: 78,
   },
-  image: {
+  background: {
     position: "absolute",
     bottom: 0,
     top: 0,
-
-    height: Dimensions.get("window").height,
+    flex: 1,
     width: "100%",
   },
   scrollViewContent: {
@@ -222,6 +242,8 @@ const styles = StyleSheet.create({
     zIndex: 3,
     top: 76,
     right: -12.5,
+    borderRadius: 50,
+    overflow: "hidden",
   },
   svgContainer: {
     width: 25,
@@ -271,7 +293,9 @@ const styles = StyleSheet.create({
     top: 12,
   },
   underlined: {
-    textDecorationLine: "underline ",
+    textDecorationLine: "underline",
+    textDecorationStyle: "solid",
+    textDecorationColor: "#1B4371",
   },
   hideBtnText: { color: "#1B4371", fontSize: 16 },
 });

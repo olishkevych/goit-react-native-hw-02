@@ -12,16 +12,12 @@ import {
   KeyboardAvoidingView,
 } from "react-native";
 
-import BackgroundImg from "../background.png";
+import BackgroundImg from "../img/background.png";
 
 const RegistrationScreen = () => {
   const [hidePassword, setHidePassword] = useState(true);
 
-  const [inputFocus, setInputFocus] = useState({
-    username: { backgroundColor: "#F6F6F6", borderColor: "#E8E8E8" },
-    email: { backgroundColor: "#F6F6F6", borderColor: "#E8E8E8" },
-    password: { backgroundColor: "#F6F6F6", borderColor: "#E8E8E8" },
-  });
+  const [inputFocus, setInputFocus] = useState({});
 
   const managePasswordVisibility = () => {
     setHidePassword(!hidePassword);
@@ -46,10 +42,14 @@ const RegistrationScreen = () => {
   };
 
   return (
-    <ImageBackground source={BackgroundImg} style={styles.image}>
+    <ImageBackground
+      source={BackgroundImg}
+      style={styles.background}
+      resizeMethod="resize"
+    >
       <KeyboardAvoidingView
-        behavior={"height"}
-        keyboardVerticalOffset={-210}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={-162}
         style={styles.containerKeyBoard}
       >
         <View style={styles.container}>
@@ -84,14 +84,22 @@ const RegistrationScreen = () => {
                   )}
                 </TouchableOpacity>
               </View>
-              <Pressable style={styles.primaryBtn}>
+              <Pressable
+                style={({ pressed }) => [
+                  styles.primaryBtn,
+                  {
+                    backgroundColor: pressed ? "#ff6a00ab" : "#FF6C00",
+                  },
+                ]}
+              >
                 <Text style={styles.btnText}>{"Sign in"}</Text>
               </Pressable>
-              <View style={styles.secTxtWrap}>
-                <Text style={styles.secText}>Don't have an account? </Text>
+              <View>
                 <TouchableOpacity
+                  style={styles.secTxtWrap}
                   onPress={() => console.log("go to sing up screen function")}
                 >
+                  <Text style={styles.secText}>Don't have an account? </Text>
                   <Text style={[styles.secText, styles.underlined]}>
                     Sign up
                   </Text>
@@ -108,6 +116,13 @@ const RegistrationScreen = () => {
 const styles = StyleSheet.create({
   container: { height: "100%", width: "100%", justifyContent: "flex-end" },
   containerKeyBoard: { justifyContent: "flex-end" },
+  background: {
+    position: "fixed",
+    bottom: 0,
+    top: 0,
+    flex: 1,
+    width: "100%",
+  },
   regWrap: {
     backgroundColor: "#FFFFFF",
     borderRadius: 25,
@@ -181,7 +196,9 @@ const styles = StyleSheet.create({
     top: 12,
   },
   underlined: {
-    textDecorationLine: "underline ",
+    textDecorationLine: "underline",
+    textDecorationStyle: "solid",
+    textDecorationColor: "#1B4371",
   },
   hideBtnText: { color: "#1B4371", fontSize: 16 },
 });
