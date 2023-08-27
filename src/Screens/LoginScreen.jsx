@@ -117,7 +117,7 @@ const styles = StyleSheet.create({
   container: { height: "100%", width: "100%", justifyContent: "flex-end" },
   containerKeyBoard: { justifyContent: "flex-end" },
   background: {
-    position: "fixed",
+    position: "absolute",
     bottom: 0,
     top: 0,
     flex: 1,
