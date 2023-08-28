@@ -16,28 +16,31 @@ import BackgroundImg from "../img/background.png";
 
 const RegistrationScreen = () => {
   const [hidePassword, setHidePassword] = useState(true);
-
+  const [userData, setUserData] = useState({});
   const [inputFocus, setInputFocus] = useState({});
 
   const managePasswordVisibility = () => {
     setHidePassword(!hidePassword);
   };
 
+  const handleInputChange = (field, newText) => {
+    setUserData({ ...userData, [field]: newText });
+  };
+
   const onFocus = (field) => {
     setInputFocus((prevState) => ({
       ...prevState,
-      [field]: {
-        backgroundColor: "#FFF",
-        borderColor: "#FF6C00",
-        color: "#212121",
-      },
+      [field]: true,
     }));
   };
 
   const onBlur = (field) => {
+    if (field === "password") {
+      setHidePassword(true);
+    }
     setInputFocus((prevState) => ({
       ...prevState,
-      [field]: { backgroundColor: "#F6F6F6", borderColor: "#E8E8E8" },
+      [field]: false,
     }));
   };
 
@@ -60,18 +63,25 @@ const RegistrationScreen = () => {
                 placeholder="Email"
                 inputMode="email"
                 placeholderTextColor={"#BDBDBD"}
-                style={[styles.input, inputFocus.email]}
+                style={[styles.input, inputFocus.email && styles.focusedInput]}
                 onFocus={() => onFocus("email")}
                 onBlur={() => onBlur("email")}
+                onChangeText={(text) => handleInputChange("email", text)}
+                defaultValue={userData.email}
               ></TextInput>
               <View>
                 <TextInput
                   placeholder="Password"
                   secureTextEntry={hidePassword}
                   placeholderTextColor={"#BDBDBD"}
-                  style={[styles.input, inputFocus.password]}
+                  style={[
+                    styles.input,
+                    inputFocus.password && styles.focusedInput,
+                  ]}
                   onFocus={() => onFocus("password")}
                   onBlur={() => onBlur("password")}
+                  onChangeText={(text) => handleInputChange("password", text)}
+                  defaultValue={userData.password}
                 ></TextInput>
                 <TouchableOpacity
                   onPress={() => managePasswordVisibility()}
@@ -87,9 +97,7 @@ const RegistrationScreen = () => {
               <Pressable
                 style={({ pressed }) => [
                   styles.primaryBtn,
-                  {
-                    backgroundColor: pressed ? "#ff6a00ab" : "#FF6C00",
-                  },
+                  pressed && styles.primaryBtnPressed,
                 ]}
               >
                 <Text style={styles.btnText}>{"Sign in"}</Text>
@@ -117,7 +125,6 @@ const styles = StyleSheet.create({
   container: { height: "100%", width: "100%", justifyContent: "flex-end" },
   containerKeyBoard: { justifyContent: "flex-end" },
   background: {
-    position: "absolute",
     bottom: 0,
     top: 0,
     flex: 1,
@@ -128,8 +135,7 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     borderBottomLeftRadius: 0,
     borderBottomRightRadius: 0,
-    paddingLeft: 16,
-    paddingRight: 16,
+    paddingHorizontal: 16,
     paddingTop: 32,
     paddingBottom: 132,
   },
@@ -143,17 +149,8 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     fontSize: 16,
   },
-  activeInput: {
-    backgroundColor: "#FFF",
-    height: 50,
-    borderWidth: 1,
-    borderColor: "#FF6C00",
-    borderRadius: 10,
-    padding: 16,
-    marginBottom: 16,
-    color: "#212121",
-    fontSize: 16,
-  },
+  focusedInput: { borderColor: "#FF6C00", backgroundColor: "#FFFFFF" },
+
   formHeader: {
     fontSize: 30,
     letterSpacing: 0.3,
@@ -167,13 +164,12 @@ const styles = StyleSheet.create({
     marginTop: 27,
     marginBottom: 16,
     borderRadius: 100,
-    paddingTop: 16,
-    paddingBottom: 16,
-    paddingLeft: 32,
-    paddingRight: 32,
+    paddingVertical: 16,
+    paddingHorizontal: 32,
     backgroundColor: "#FF6C00",
     height: 51,
   },
+  primaryBtnPressed: { backgroundColor: "#ff6a00ab" },
   btnText: {
     color: "#FFF",
     textAlign: "center",

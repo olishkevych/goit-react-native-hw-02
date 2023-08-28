@@ -18,28 +18,31 @@ import { AntDesign } from "@expo/vector-icons";
 const RegistrationScreen = () => {
   const [image, setImage] = useState(null);
   const [hidePassword, setHidePassword] = useState(true);
-
   const [inputFocus, setInputFocus] = useState({});
+  const [userData, setUserData] = useState({});
 
   const managePasswordVisibility = () => {
     setHidePassword(!hidePassword);
   };
 
+  const handleInputChange = (field, newText) => {
+    setUserData({ ...userData, [field]: newText });
+  };
+
   const onFocus = (field) => {
     setInputFocus((prevState) => ({
       ...prevState,
-      [field]: {
-        backgroundColor: "#FFF",
-        borderColor: "#FF6C00",
-        color: "#212121",
-      },
+      [field]: true,
     }));
   };
 
   const onBlur = (field) => {
+    if (field === "password") {
+      setHidePassword(true);
+    }
     setInputFocus((prevState) => ({
       ...prevState,
-      [field]: { backgroundColor: "#F6F6F6", borderColor: "#E8E8E8" },
+      [field]: false,
     }));
   };
 
@@ -51,8 +54,6 @@ const RegistrationScreen = () => {
       quality: 1,
     });
 
-    console.log(result);
-
     if (!result.canceled) {
       setImage(result.assets[0].uri);
     }
@@ -61,7 +62,6 @@ const RegistrationScreen = () => {
   const removeImage = () => {
     setImage(null);
   };
-  console.log(image);
 
   return (
     <ImageBackground
@@ -79,10 +79,7 @@ const RegistrationScreen = () => {
             <View style={styles.avatarWrap}>
               <View style={styles.avatar}>
                 {image && (
-                  <Image
-                    source={{ uri: image }}
-                    style={{ width: 120, height: 120, borderRadius: 16 }}
-                  />
+                  <Image source={{ uri: image }} style={styles.avatar} />
                 )}
               </View>
               {image ? (
@@ -90,9 +87,7 @@ const RegistrationScreen = () => {
                   onPress={removeImage}
                   style={({ pressed }) => [
                     styles.avatarBtn,
-                    {
-                      backgroundColor: pressed ? "#F6F6F6" : "#FFFFFF",
-                    },
+                    pressed && styles.avatarBtnPressed,
                   ]}
                 >
                   <View style={styles.svgContainer}>
@@ -104,9 +99,7 @@ const RegistrationScreen = () => {
                   onPress={pickImage}
                   style={({ pressed }) => [
                     styles.avatarBtn,
-                    {
-                      backgroundColor: pressed ? "#F6F6F6" : "#FFFFFF",
-                    },
+                    pressed && styles.avatarBtnPressed,
                   ]}
                 >
                   <View style={styles.svgContainer}>
@@ -120,26 +113,38 @@ const RegistrationScreen = () => {
               <TextInput
                 placeholder="Username"
                 placeholderTextColor={"#BDBDBD"}
-                style={[styles.input, inputFocus.username]}
+                style={[
+                  styles.input,
+                  inputFocus.username && styles.focusedInput,
+                ]}
                 onFocus={() => onFocus("username")}
                 onBlur={() => onBlur("username")}
+                onChangeText={(text) => handleInputChange("username", text)}
+                defaultValue={userData.username}
               ></TextInput>
               <TextInput
                 placeholder="Email"
                 inputMode="email"
                 placeholderTextColor={"#BDBDBD"}
-                style={[styles.input, inputFocus.email]}
+                style={[styles.input, inputFocus.email && styles.focusedInput]}
                 onFocus={() => onFocus("email")}
                 onBlur={() => onBlur("email")}
+                onChangeText={(text) => handleInputChange("email", text)}
+                defaultValue={userData.email}
               ></TextInput>
               <View>
                 <TextInput
                   placeholder="Password"
                   secureTextEntry={hidePassword}
                   placeholderTextColor={"#BDBDBD"}
-                  style={[styles.input, inputFocus.password]}
+                  style={[
+                    styles.input,
+                    inputFocus.password && styles.focusedInput,
+                  ]}
                   onFocus={() => onFocus("password")}
                   onBlur={() => onBlur("password")}
+                  onChangeText={(text) => handleInputChange("password", text)}
+                  defaultValue={userData.password}
                 ></TextInput>
                 <TouchableOpacity
                   onPress={() => managePasswordVisibility()}
@@ -153,9 +158,7 @@ const RegistrationScreen = () => {
               <Pressable
                 style={({ pressed }) => [
                   styles.primaryBtn,
-                  {
-                    backgroundColor: pressed ? "#ff6a00ab" : "#FF6C00",
-                  },
+                  pressed && styles.primaryBtnPressed,
                 ]}
               >
                 <Text style={styles.btnText}>{"Sign up"}</Text>
@@ -187,13 +190,11 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     borderBottomLeftRadius: 0,
     borderBottomRightRadius: 0,
-    paddingLeft: 16,
-    paddingRight: 16,
+    paddingHorizontal: 16,
     paddingTop: 92,
     paddingBottom: 78,
   },
   background: {
-    position: "absolute",
     bottom: 0,
     top: 0,
     flex: 1,
@@ -213,17 +214,9 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     fontSize: 16,
   },
-  activeInput: {
-    backgroundColor: "#FFF",
-    height: 50,
-    borderWidth: 1,
-    borderColor: "#FF6C00",
-    borderRadius: 10,
-    padding: 16,
-    marginBottom: 16,
-    color: "#212121",
-    fontSize: 16,
-  },
+
+  focusedInput: { borderColor: "#FF6C00", backgroundColor: "#FFFFFF" },
+
   avatar: {
     backgroundColor: "#F6F6F6",
     width: 120,
@@ -244,6 +237,10 @@ const styles = StyleSheet.create({
     right: -12.5,
     borderRadius: 50,
     overflow: "hidden",
+    backgroundColor: "#FFFFFF",
+  },
+  avatarBtnPressed: {
+    backgroundColor: "#F6F6F6",
   },
   svgContainer: {
     width: 25,
@@ -264,13 +261,12 @@ const styles = StyleSheet.create({
     marginTop: 27,
     marginBottom: 16,
     borderRadius: 100,
-    paddingTop: 16,
-    paddingBottom: 16,
-    paddingLeft: 32,
-    paddingRight: 32,
+    paddingVertical: 16,
+    paddingHorizontal: 32,
     backgroundColor: "#FF6C00",
     height: 51,
   },
+  primaryBtnPressed: { backgroundColor: "#ff6a00ab" },
   btnText: {
     color: "#FFF",
     textAlign: "center",
