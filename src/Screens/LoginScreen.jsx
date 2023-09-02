@@ -5,11 +5,11 @@ import {
   TextInput,
   ImageBackground,
   StyleSheet,
-  Dimensions,
   Text,
-  Image,
   Pressable,
   KeyboardAvoidingView,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from "react-native";
 
 import BackgroundImg from "../img/background.png";
@@ -25,6 +25,10 @@ const RegistrationScreen = () => {
 
   const handleInputChange = (field, newText) => {
     setUserData({ ...userData, [field]: newText });
+  };
+
+  const handleLoginClick = () => {
+    console.log(userData);
   };
 
   const onFocus = (field) => {
@@ -45,79 +49,85 @@ const RegistrationScreen = () => {
   };
 
   return (
-    <ImageBackground
-      source={BackgroundImg}
-      style={styles.background}
-      resizeMethod="resize"
-    >
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        keyboardVerticalOffset={-162}
-        style={styles.containerKeyBoard}
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <ImageBackground
+        source={BackgroundImg}
+        style={styles.background}
+        resizeMethod="resize"
       >
-        <View style={styles.container}>
-          <View style={styles.regWrap}>
-            <View>
-              <Text style={styles.formHeader}>{"Login"}</Text>
-              <TextInput
-                placeholder="Email"
-                inputMode="email"
-                placeholderTextColor={"#BDBDBD"}
-                style={[styles.input, inputFocus.email && styles.focusedInput]}
-                onFocus={() => onFocus("email")}
-                onBlur={() => onBlur("email")}
-                onChangeText={(text) => handleInputChange("email", text)}
-                defaultValue={userData.email}
-              ></TextInput>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          keyboardVerticalOffset={-182}
+          style={styles.containerKeyBoard}
+        >
+          <View style={styles.container}>
+            <View style={styles.regWrap}>
               <View>
+                <Text style={styles.formHeader}>{"Login"}</Text>
                 <TextInput
-                  placeholder="Password"
-                  secureTextEntry={hidePassword}
+                  placeholder="Email"
+                  inputMode="email"
                   placeholderTextColor={"#BDBDBD"}
                   style={[
                     styles.input,
-                    inputFocus.password && styles.focusedInput,
+                    inputFocus.email && styles.focusedInput,
                   ]}
-                  onFocus={() => onFocus("password")}
-                  onBlur={() => onBlur("password")}
-                  onChangeText={(text) => handleInputChange("password", text)}
-                  defaultValue={userData.password}
+                  onFocus={() => onFocus("email")}
+                  onBlur={() => onBlur("email")}
+                  onChangeText={(text) => handleInputChange("email", text)}
+                  defaultValue={userData.email}
                 ></TextInput>
-                <TouchableOpacity
-                  onPress={() => managePasswordVisibility()}
-                  style={styles.hideBtn}
+                <View>
+                  <TextInput
+                    placeholder="Password"
+                    secureTextEntry={hidePassword}
+                    placeholderTextColor={"#BDBDBD"}
+                    style={[
+                      styles.input,
+                      inputFocus.password && styles.focusedInput,
+                    ]}
+                    onFocus={() => onFocus("password")}
+                    onBlur={() => onBlur("password")}
+                    onChangeText={(text) => handleInputChange("password", text)}
+                    defaultValue={userData.password}
+                  ></TextInput>
+                  <TouchableOpacity
+                    onPress={() => managePasswordVisibility()}
+                    style={styles.hideBtn}
+                  >
+                    {hidePassword ? (
+                      <Text style={styles.hideBtnText}>Show</Text>
+                    ) : (
+                      <Text style={styles.hideBtnText}>Hide</Text>
+                    )}
+                  </TouchableOpacity>
+                </View>
+                <Pressable
+                  onPress={handleLoginClick}
+                  style={({ pressed }) => [
+                    styles.primaryBtn,
+                    pressed && styles.primaryBtnPressed,
+                  ]}
                 >
-                  {hidePassword ? (
-                    <Text style={styles.hideBtnText}>Show</Text>
-                  ) : (
-                    <Text style={styles.hideBtnText}>Hide</Text>
-                  )}
-                </TouchableOpacity>
-              </View>
-              <Pressable
-                style={({ pressed }) => [
-                  styles.primaryBtn,
-                  pressed && styles.primaryBtnPressed,
-                ]}
-              >
-                <Text style={styles.btnText}>{"Sign in"}</Text>
-              </Pressable>
-              <View>
-                <TouchableOpacity
-                  style={styles.secTxtWrap}
-                  onPress={() => console.log("go to sing up screen function")}
-                >
-                  <Text style={styles.secText}>Don't have an account? </Text>
-                  <Text style={[styles.secText, styles.underlined]}>
-                    Sign up
-                  </Text>
-                </TouchableOpacity>
+                  <Text style={styles.btnText}>{"Sign in"}</Text>
+                </Pressable>
+                <View>
+                  <TouchableOpacity
+                    style={styles.secTxtWrap}
+                    onPress={() => console.log("go to sing up screen function")}
+                  >
+                    <Text style={styles.secText}>Don't have an account? </Text>
+                    <Text style={[styles.secText, styles.underlined]}>
+                      Sign up
+                    </Text>
+                  </TouchableOpacity>
+                </View>
               </View>
             </View>
           </View>
-        </View>
-      </KeyboardAvoidingView>
-    </ImageBackground>
+        </KeyboardAvoidingView>
+      </ImageBackground>
+    </TouchableWithoutFeedback>
   );
 };
 

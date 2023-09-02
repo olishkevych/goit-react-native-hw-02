@@ -5,11 +5,12 @@ import {
   TextInput,
   ImageBackground,
   StyleSheet,
-  Dimensions,
   Text,
   Image,
   Pressable,
   KeyboardAvoidingView,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import BackgroundImg from "../img/background.png";
@@ -27,6 +28,10 @@ const RegistrationScreen = () => {
 
   const handleInputChange = (field, newText) => {
     setUserData({ ...userData, [field]: newText });
+  };
+
+  const handleSignInClick = () => {
+    console.log(userData);
   };
 
   const onFocus = (field) => {
@@ -64,121 +69,133 @@ const RegistrationScreen = () => {
   };
 
   return (
-    <ImageBackground
-      source={BackgroundImg}
-      style={styles.background}
-      resizeMethod="resize"
-    >
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        keyboardVerticalOffset={-247}
-        style={styles.containerKeyBoard}
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <ImageBackground
+        source={BackgroundImg}
+        style={styles.background}
+        resizeMethod="resize"
       >
-        <View style={styles.container}>
-          <View style={styles.regWrap}>
-            <View style={styles.avatarWrap}>
-              <View style={styles.avatar}>
-                {image && (
-                  <Image source={{ uri: image }} style={styles.avatar} />
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          keyboardVerticalOffset={-247}
+          style={styles.containerKeyBoard}
+        >
+          <View style={styles.container}>
+            <View style={styles.regWrap}>
+              <View style={styles.avatarWrap}>
+                <View style={styles.avatar}>
+                  {image && (
+                    <Image source={{ uri: image }} style={styles.avatar} />
+                  )}
+                </View>
+                {image ? (
+                  <Pressable
+                    onPress={removeImage}
+                    style={({ pressed }) => [
+                      styles.avatarBtn,
+                      pressed && styles.avatarBtnPressed,
+                    ]}
+                  >
+                    <View style={styles.svgContainer}>
+                      <AntDesign
+                        name="closecircleo"
+                        size={25}
+                        color="#BDBDBD"
+                      />
+                    </View>
+                  </Pressable>
+                ) : (
+                  <Pressable
+                    onPress={pickImage}
+                    style={({ pressed }) => [
+                      styles.avatarBtn,
+                      pressed && styles.avatarBtnPressed,
+                    ]}
+                  >
+                    <View style={styles.svgContainer}>
+                      <AntDesign name="pluscircleo" size={25} color="#FF6C00" />
+                    </View>
+                  </Pressable>
                 )}
               </View>
-              {image ? (
-                <Pressable
-                  onPress={removeImage}
-                  style={({ pressed }) => [
-                    styles.avatarBtn,
-                    pressed && styles.avatarBtnPressed,
-                  ]}
-                >
-                  <View style={styles.svgContainer}>
-                    <AntDesign name="closecircleo" size={25} color="#BDBDBD" />
-                  </View>
-                </Pressable>
-              ) : (
-                <Pressable
-                  onPress={pickImage}
-                  style={({ pressed }) => [
-                    styles.avatarBtn,
-                    pressed && styles.avatarBtnPressed,
-                  ]}
-                >
-                  <View style={styles.svgContainer}>
-                    <AntDesign name="pluscircleo" size={25} color="#FF6C00" />
-                  </View>
-                </Pressable>
-              )}
-            </View>
-            <View>
-              <Text style={styles.formHeader}>{"Create an account"}</Text>
-              <TextInput
-                placeholder="Username"
-                placeholderTextColor={"#BDBDBD"}
-                style={[
-                  styles.input,
-                  inputFocus.username && styles.focusedInput,
-                ]}
-                onFocus={() => onFocus("username")}
-                onBlur={() => onBlur("username")}
-                onChangeText={(text) => handleInputChange("username", text)}
-                defaultValue={userData.username}
-              ></TextInput>
-              <TextInput
-                placeholder="Email"
-                inputMode="email"
-                placeholderTextColor={"#BDBDBD"}
-                style={[styles.input, inputFocus.email && styles.focusedInput]}
-                onFocus={() => onFocus("email")}
-                onBlur={() => onBlur("email")}
-                onChangeText={(text) => handleInputChange("email", text)}
-                defaultValue={userData.email}
-              ></TextInput>
               <View>
+                <Text style={styles.formHeader}>{"Create an account"}</Text>
                 <TextInput
-                  placeholder="Password"
-                  secureTextEntry={hidePassword}
+                  placeholder="Username"
                   placeholderTextColor={"#BDBDBD"}
                   style={[
                     styles.input,
-                    inputFocus.password && styles.focusedInput,
+                    inputFocus.username && styles.focusedInput,
                   ]}
-                  onFocus={() => onFocus("password")}
-                  onBlur={() => onBlur("password")}
-                  onChangeText={(text) => handleInputChange("password", text)}
-                  defaultValue={userData.password}
+                  onFocus={() => onFocus("username")}
+                  onBlur={() => onBlur("username")}
+                  onChangeText={(text) => handleInputChange("username", text)}
+                  defaultValue={userData.username}
                 ></TextInput>
-                <TouchableOpacity
-                  onPress={() => managePasswordVisibility()}
-                  style={styles.hideBtn}
+                <TextInput
+                  placeholder="Email"
+                  inputMode="email"
+                  placeholderTextColor={"#BDBDBD"}
+                  style={[
+                    styles.input,
+                    inputFocus.email && styles.focusedInput,
+                  ]}
+                  onFocus={() => onFocus("email")}
+                  onBlur={() => onBlur("email")}
+                  onChangeText={(text) => handleInputChange("email", text)}
+                  defaultValue={userData.email}
+                ></TextInput>
+                <View>
+                  <TextInput
+                    placeholder="Password"
+                    secureTextEntry={hidePassword}
+                    placeholderTextColor={"#BDBDBD"}
+                    style={[
+                      styles.input,
+                      inputFocus.password && styles.focusedInput,
+                    ]}
+                    onFocus={() => onFocus("password")}
+                    onBlur={() => onBlur("password")}
+                    onChangeText={(text) => handleInputChange("password", text)}
+                    defaultValue={userData.password}
+                  ></TextInput>
+                  <TouchableOpacity
+                    onPress={() => managePasswordVisibility()}
+                    style={styles.hideBtn}
+                  >
+                    <Text style={styles.hideBtnText}>
+                      {hidePassword ? "Show" : "Hide"}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+                <Pressable
+                  onPress={handleSignInClick}
+                  style={({ pressed }) => [
+                    styles.primaryBtn,
+                    pressed && styles.primaryBtnPressed,
+                  ]}
                 >
-                  <Text style={styles.hideBtnText}>
-                    {hidePassword ? "Show" : "Hide"}
-                  </Text>
-                </TouchableOpacity>
-              </View>
-              <Pressable
-                style={({ pressed }) => [
-                  styles.primaryBtn,
-                  pressed && styles.primaryBtnPressed,
-                ]}
-              >
-                <Text style={styles.btnText}>{"Sign up"}</Text>
-              </Pressable>
-              <View>
-                <TouchableOpacity
-                  style={styles.secTxtWrap}
-                  onPress={() => console.log("go to login screen function")}
-                >
-                  <Text style={styles.secText}>Already have an account? </Text>
-                  <Text style={[styles.secText, styles.underlined]}>
-                    Sign in
-                  </Text>
-                </TouchableOpacity>
+                  <Text style={styles.btnText}>{"Sign up"}</Text>
+                </Pressable>
+                <View>
+                  <TouchableOpacity
+                    style={styles.secTxtWrap}
+                    onPress={() => console.log("go to login screen function")}
+                  >
+                    <Text style={styles.secText}>
+                      Already have an account?{" "}
+                    </Text>
+                    <Text style={[styles.secText, styles.underlined]}>
+                      Sign in
+                    </Text>
+                  </TouchableOpacity>
+                </View>
               </View>
             </View>
           </View>
-        </View>
-      </KeyboardAvoidingView>
-    </ImageBackground>
+        </KeyboardAvoidingView>
+      </ImageBackground>
+    </TouchableWithoutFeedback>
   );
 };
 
