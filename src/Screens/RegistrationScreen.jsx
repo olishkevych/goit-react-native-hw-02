@@ -32,6 +32,7 @@ const RegistrationScreen = () => {
 
   const handleSignInClick = () => {
     console.log(userData);
+    setUserData({});
   };
 
   const onFocus = (field) => {
@@ -70,15 +71,15 @@ const RegistrationScreen = () => {
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <ImageBackground
-        source={BackgroundImg}
-        style={styles.background}
-        resizeMethod="resize"
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={-147}
+        style={styles.container}
       >
-        <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          keyboardVerticalOffset={-247}
-          style={styles.containerKeyBoard}
+        <ImageBackground
+          source={BackgroundImg}
+          style={styles.background}
+          resizeMethod="resize"
         >
           <View style={styles.container}>
             <View style={styles.regWrap}>
@@ -193,14 +194,19 @@ const RegistrationScreen = () => {
               </View>
             </View>
           </View>
-        </KeyboardAvoidingView>
-      </ImageBackground>
+        </ImageBackground>
+      </KeyboardAvoidingView>
     </TouchableWithoutFeedback>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { height: "100%", width: "100%", justifyContent: "flex-end" },
+  container: {
+    height: "100%",
+    width: "100%",
+    flexGrow: 1,
+    justifyContent: "flex-end",
+  },
 
   regWrap: {
     backgroundColor: "#FFFFFF",
