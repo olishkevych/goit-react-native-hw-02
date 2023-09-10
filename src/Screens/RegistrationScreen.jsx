@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigation } from "@react-navigation/native";
 import {
   TouchableOpacity,
   View,
@@ -22,6 +23,8 @@ const RegistrationScreen = () => {
   const [inputFocus, setInputFocus] = useState({});
   const [userData, setUserData] = useState({});
 
+  const navigation = useNavigation();
+
   const managePasswordVisibility = () => {
     setHidePassword(!hidePassword);
   };
@@ -33,6 +36,7 @@ const RegistrationScreen = () => {
   const handleSignInClick = () => {
     console.log(userData);
     setUserData({});
+    navigation.navigate("BottomNav", { screen: "Posts" });
   };
 
   const onFocus = (field) => {
@@ -181,7 +185,7 @@ const RegistrationScreen = () => {
                 <View>
                   <TouchableOpacity
                     style={styles.secTxtWrap}
-                    onPress={() => console.log("go to login screen function")}
+                    onPress={() => navigation.navigate("Login")}
                   >
                     <Text style={styles.secText}>
                       Already have an account?{" "}
