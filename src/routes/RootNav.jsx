@@ -12,15 +12,15 @@ import CreatePostsScreen from "../Screens/CreatePostsScreen";
 const RootNav = () => {
   const Stack = createStackNavigator();
   return (
-    <Stack.Navigator initialRouteName="LoginScreen">
-      <Stack.Screen
-        name="Registration"
-        component={RegistrationScreen}
-        options={{ headerShown: false }}
-      />
+    <Stack.Navigator initialRouteName="Login">
       <Stack.Screen
         name="Login"
         component={LoginScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="Registration"
+        component={RegistrationScreen}
         options={{ headerShown: false }}
       />
       <Stack.Screen
