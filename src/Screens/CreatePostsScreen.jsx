@@ -1,6 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
+import { Camera, CameraOrientation } from "expo-camera";
+import * as MediaLibrary from "expo-media-library";
+import * as Location from "expo-location";
+
 import {
   View,
   Text,
@@ -10,39 +14,76 @@ import {
   TextInput,
   TouchableWithoutFeedback,
   Keyboard,
+  TouchableOpacity,
+  Dimensions,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { Feather } from "@expo/vector-icons";
 
+import posts from "../data/postsData";
+
 const CreatePostsScreen = () => {
   const [postData, setPostData] = useState({});
   const [inputFocus, setInputFocus] = useState({});
+  const [hasPermission, setHasPermission] = useState(null);
+  const [cameraRef, setCameraRef] = useState(null);
+  const [type, setType] = useState(Camera.Constants.Type.back);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const { status } = await Camera.requestCameraPermissionsAsync();
+        await MediaLibrary.requestPermissionsAsync();
+        setHasPermission(status === "granted");
+      } catch (error) {
+        console.log(error);
+      }
+    })();
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        let status = await Location.requestForegroundPermissionsAsync();
+      } catch (e) {
+        console.log("Permission to access location was denied");
+      }
+    })();
+  }, []);
+
+  if (hasPermission === null) {
+    return <View />;
+  }
+  if (hasPermission === false) {
+    return <Text>No access to camera</Text>;
+  }
 
   const navigation = useNavigation();
 
   const isPostComplete = () => {
-    if (
-      postData.image &&
-      postData.title &&
-      postData.location &&
-      postData.title.length > 0 &&
-      postData.location.length > 0
-    )
-      return true;
-    else return false;
+    postData.image &&
+    postData.title &&
+    postData.location &&
+    postData.title.length > 0 &&
+    postData.location.length > 0
+      ? true
+      : false;
   };
 
-  const pickImage = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
-      allowsEditing: true,
-      aspect: [17, 12],
-      quality: 1,
-    });
-
-    if (!result.canceled) {
-      setPostData({ ...postData, image: result.assets[0].uri });
+  const handleCameraPress = async () => {
+    if (cameraRef) {
+      try {
+        const { uri } = await cameraRef.takePictureAsync();
+        await MediaLibrary.createAssetAsync(uri);
+        setPostData({ ...postData, image: uri });
+      } catch (error) {
+        console.error(error);
+      }
     }
+  };
+
+  const onDeletePhoto = () => {
+    setPostData({ ...postData, image: null });
   };
 
   const onFocus = (field) => {
@@ -63,8 +104,25 @@ const CreatePostsScreen = () => {
     setPostData({});
   };
 
-  onSavePost = () => {
-    console.log("Adding post to the array function");
+  const onSavePost = async () => {
+    try {
+      let location = await Location.getCurrentPositionAsync({});
+      const coords = {
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+      };
+      setPostData({ ...postData, coords });
+    } catch (error) {
+      console.error(error);
+    }
+    const postToAdd = {
+      ...postData,
+      id: Date.now(),
+      userID: "user2",
+      likes: 0,
+      comments: [],
+    };
+    posts.push(postToAdd);
     setPostData({});
     navigation.navigate("Posts");
   };
@@ -77,27 +135,62 @@ const CreatePostsScreen = () => {
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View style={styles.container}>
         <View>
-          <View style={styles.postImgContainer}>
-            {postData.image && (
+          {postData.image && (
+            <View style={styles.postImgContainer}>
               <Image source={{ uri: postData.image }} style={styles.image} />
-            )}
-            <View style={styles.pickImgWrap}>
               <Pressable
-                onPress={pickImage}
-                style={[styles.pickImg, postData.image && styles.pickImgDimmed]}
+                onPress={onDeletePhoto}
+                style={({ pressed }) => [
+                  styles.deletePhotoButton,
+                  pressed && styles.deletePhotoButtonPressed,
+                ]}
               >
-                <FontAwesome5
-                  name="camera"
-                  size={24}
-                  color={postData.image ? "#FFFFFF" : "#BDBDBD"}
-                />
+                <Feather name="trash-2" size={24} color="#FFFFFF" />
               </Pressable>
             </View>
-          </View>
+          )}
+
+          {!postData.image && (
+            <Camera
+              ref={setCameraRef}
+              type={type}
+              style={styles.postImgContainer}
+            >
+              <Pressable
+                onPress={() => {
+                  setType(
+                    type === Camera.Constants.Type.back
+                      ? Camera.Constants.Type.front
+                      : Camera.Constants.Type.back
+                  );
+                }}
+                style={({ pressed }) => [
+                  styles.cameraFlip,
+                  pressed && styles.cameraFlipPressed,
+                ]}
+              >
+                <Feather name="refresh-ccw" size={24} color="#FFFFFF" />
+              </Pressable>
+
+              <View style={styles.pickImgWrap}>
+                <Pressable
+                  onPress={handleCameraPress}
+                  style={[
+                    styles.pickImg,
+                    postData.image && styles.pickImgDimmed,
+                  ]}
+                >
+                  <FontAwesome5
+                    name="camera"
+                    size={24}
+                    color={postData.image ? "#FFFFFF" : "#BDBDBD"}
+                  />
+                </Pressable>
+              </View>
+            </Camera>
+          )}
           <Text style={styles.grayText}>
-            {postData.image
-              ? "Choose a different photo to upload"
-              : "Upload your photo"}
+            {postData.image ? "Take a new photo" : "Take a photo"}
           </Text>
           <View style={styles.inputWrap}>
             <TextInput
@@ -184,6 +277,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   postImgContainer: {
+    width: "100%",
     height: 240,
     backgroundColor: "#F6F6F6",
     borderRadius: 8,
@@ -191,13 +285,26 @@ const styles = StyleSheet.create({
     borderStyle: "solid",
     borderWidth: 1,
     position: "relative",
+    justifyContent: "center",
+    alignItems: "center",
   },
+  flipContainer: {
+    height: "100%",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  cameraFlip: {
+    position: "absolute",
+    zIndex: 2,
+    top: 8,
+    right: 8,
+  },
+  cameraFlipPressed: { backgroundColor: "#f6f6f661", borderRadius: 6 },
   pickImgWrap: {
     alignItems: "center",
     justifyContent: "center",
     position: "absolute",
-    width: "100%",
-    height: "100%",
+    zIndex: 2,
   },
   pickImg: {
     width: 60,
@@ -206,11 +313,12 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFF",
     alignItems: "center",
     justifyContent: "center",
+    zIndex: 2,
   },
   pickImgDimmed: { backgroundColor: " rgba(255, 255, 255, 0.30)" },
   image: {
     width: "100%",
-    height: 240,
+    height: "100%",
   },
   grayText: { color: "#BDBDBD", fontSize: 16, marginTop: 8, marginBottom: 32 },
   input: {
@@ -260,6 +368,13 @@ const styles = StyleSheet.create({
   },
   deleteButtonPressed: { backgroundColor: "#FF6C00" },
   deleteWrap: { alignItems: "center", justifyContent: "center" },
+  deletePhotoButton: {
+    position: "absolute",
+    left: 8,
+    top: 8,
+    zIndex: 2,
+  },
+  deletePhotoButtonPressed: { backgroundColor: "#f6f6f661", borderRadius: 8 },
 });
 
 export default CreatePostsScreen;

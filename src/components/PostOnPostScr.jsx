@@ -5,6 +5,7 @@ import { Feather } from "@expo/vector-icons";
 
 const PostOnPostScr = ({ post }) => {
   const navigation = useNavigation();
+  const { coords } = post;
   return (
     <View style={styles.post}>
       <Image style={styles.postImage} source={post.image} />
@@ -26,7 +27,7 @@ const PostOnPostScr = ({ post }) => {
           <Text style={styles.commentsNumber}>{post.comments.length}</Text>
         </Pressable>
         <Pressable
-          onPress={(post) => navigation.navigate("Map")}
+          onPress={(post) => navigation.navigate("Map", { coords: coords })}
           style={({ pressed }) => [
             styles.locationWrap,
             pressed && styles.pressedStyle,

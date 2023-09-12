@@ -37,6 +37,10 @@ const posts = [
       },
     ],
     location: "Earth",
+    coords: {
+      latitude: 48.858844,
+      longitude: 2.294351,
+    },
   },
   {
     id: "2",
@@ -45,6 +49,10 @@ const posts = [
     likes: 13,
     comments: [],
     location: "Moon",
+    coords: {
+      latitude: 40.689247,
+      longitude: -74.044502,
+    },
   },
   {
     id: "3",
@@ -53,6 +61,10 @@ const posts = [
     likes: 72,
     comments: [],
     location: "Mars",
+    coords: {
+      latitude: -33.856784,
+      longitude: 151.215296,
+    },
   },
 ];
 

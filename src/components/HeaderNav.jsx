@@ -25,7 +25,7 @@ const HeaderNav = ({ title }) => {
           <Feather name="log-out" size={24} color="#BDBDBD" />
         </Pressable>
       )}
-      {(title === "New Post" || title === "Comments") && (
+      {(title === "New Post" || title === "Comments" || title === "Map") && (
         <Pressable
           onPress={() => navigation.goBack()}
           style={({ pressed }) => [

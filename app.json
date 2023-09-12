@@ -20,6 +20,9 @@
         "foregroundImage": "./src/img/adaptive-icon.png",
         "backgroundColor": "#ffffff",
         "softwareKeyboardLayoutMode": "pan"
+      },
+      "config": {
+        "googleMaps": { "apiKey": "AIzaSyCrUoOps0ARE8N3cwuzU0vdA3aY0fbEIP0" }
       }
     },
     "web": {
