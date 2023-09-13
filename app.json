@@ -22,7 +22,7 @@
         "softwareKeyboardLayoutMode": "pan"
       },
       "config": {
-        "googleMaps": { "apiKey": "xxx" }
+        "googleMaps": { "apiKey": "process.env.EXPO_PUBLIC_API_KEY" }
       }
     },
     "web": {
