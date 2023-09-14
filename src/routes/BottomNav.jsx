@@ -15,6 +15,7 @@ function BottomNav() {
     <BottomTabs.Navigator
       initialRouteName="PostsScreen"
       screenOptions={{
+        unmountOnBlur: true,
         tabBarShowLabel: false,
         tabBarActiveTintColor: "#FFF",
         tabBarInactiveTintColor: "#212121CC",

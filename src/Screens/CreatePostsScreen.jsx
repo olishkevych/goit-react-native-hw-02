@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { Camera, CameraOrientation } from "expo-camera";
+
 import * as MediaLibrary from "expo-media-library";
 import * as Location from "expo-location";
 
@@ -16,6 +17,7 @@ import {
   Keyboard,
   TouchableOpacity,
   Dimensions,
+  ActivityIndicator,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { Feather } from "@expo/vector-icons";
@@ -27,6 +29,7 @@ const CreatePostsScreen = () => {
   const [inputFocus, setInputFocus] = useState({});
   const [hasPermission, setHasPermission] = useState(null);
   const [cameraRef, setCameraRef] = useState(null);
+  const [isCameraActive, setIsCameraActive] = useState(true);
   const [type, setType] = useState(Camera.Constants.Type.back);
 
   useEffect(() => {
@@ -54,11 +57,11 @@ const CreatePostsScreen = () => {
   const navigation = useNavigation();
 
   const isPostComplete = () => {
-    postData.image &&
-    postData.title &&
-    postData.location &&
-    postData.title.length > 0 &&
-    postData.location.length > 0
+    return postData.image &&
+      postData.title &&
+      postData.location &&
+      postData.title.length > 0 &&
+      postData.location.length > 0
       ? true
       : false;
   };
@@ -66,8 +69,12 @@ const CreatePostsScreen = () => {
   const handleCameraPress = async () => {
     if (cameraRef) {
       try {
+        setIsCameraActive(false);
+
         const { uri } = await cameraRef.takePictureAsync();
+        await cameraRef.pausePreview();
         await MediaLibrary.createAssetAsync(uri);
+
         setPostData({ ...postData, image: uri });
       } catch (error) {
         console.error(error);
@@ -77,6 +84,7 @@ const CreatePostsScreen = () => {
 
   const onDeletePhoto = () => {
     setPostData({ ...postData, image: null });
+    setIsCameraActive(true);
   };
 
   const onFocus = (field) => {
@@ -94,6 +102,7 @@ const CreatePostsScreen = () => {
   };
 
   const onDeleteDraft = () => {
+    setIsCameraActive(true);
     setPostData({});
   };
 
@@ -118,6 +127,7 @@ const CreatePostsScreen = () => {
     posts.push(postToAdd);
     setPostData({});
     navigation.navigate("Posts");
+    setIsCameraActive(true);
   };
 
   const handleInputChange = (field, newText) => {
@@ -164,22 +174,29 @@ const CreatePostsScreen = () => {
               >
                 <Feather name="refresh-ccw" size={24} color="#FFFFFF" />
               </Pressable>
+              {!isCameraActive && (
+                <View style={styles.loaderContainer}>
+                  <ActivityIndicator color="#FF6C00" size={"large"} />
+                </View>
+              )}
 
-              <View style={styles.pickImgWrap}>
-                <Pressable
-                  onPress={handleCameraPress}
-                  style={[
-                    styles.pickImg,
-                    postData.image && styles.pickImgDimmed,
-                  ]}
-                >
-                  <FontAwesome5
-                    name="camera"
-                    size={24}
-                    color={postData.image ? "#FFFFFF" : "#BDBDBD"}
-                  />
-                </Pressable>
-              </View>
+              {isCameraActive && (
+                <View style={styles.pickImgWrap}>
+                  <Pressable
+                    onPress={handleCameraPress}
+                    style={[
+                      styles.pickImg,
+                      postData.image && styles.pickImgDimmed,
+                    ]}
+                  >
+                    <FontAwesome5
+                      name="camera"
+                      size={24}
+                      color={postData.image ? "#FFFFFF" : "#BDBDBD"}
+                    />
+                  </Pressable>
+                </View>
+              )}
             </Camera>
           )}
           <Text style={styles.grayText}>
@@ -203,6 +220,7 @@ const CreatePostsScreen = () => {
               color="#BDBDBD"
               style={styles.locationPin}
             />
+
             <TextInput
               placeholder="Location..."
               placeholderTextColor="#BDBDBD"
@@ -219,7 +237,7 @@ const CreatePostsScreen = () => {
           </View>
           <Pressable
             onPress={onSavePost}
-            disabled={isPostComplete() ? false : true}
+            // disabled={isPostComplete() ? false : true}
             style={({ pressed }) => [
               styles.publishButton,
               isPostComplete() && styles.publishButtonActive,
@@ -269,6 +287,15 @@ const styles = StyleSheet.create({
     paddingVertical: 32,
     justifyContent: "space-between",
   },
+  loaderContainer: {
+    width: 390,
+    height: 240,
+    zIndex: 4,
+    backgroundColor: "white",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
   postImgContainer: {
     width: "100%",
     height: 240,
