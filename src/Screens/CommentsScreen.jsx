@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import uuid from "react-native-uuid";
 import {
   View,
   StyleSheet,
@@ -7,23 +9,48 @@ import {
   TextInput,
   FlatList,
   ScrollView,
-  KeyboardAvoidingView,
   Keyboard,
 } from "react-native";
+import {
+  selectError,
+  selectPhotoURL,
+  selectPosts,
+  selectUID,
+} from "../redux/selectors";
 import Comment from "../components/Comment";
+import { addComment } from "../redux/operations";
+import { formatTimestamp } from "../helpers/formatTimestamp";
+
 import { Feather } from "@expo/vector-icons";
 
 const CommentsScreen = ({ route }) => {
-  const { post } = route.params;
+  const { postID } = route.params;
   const [newComment, setNewComment] = useState("");
   const [inputFocus, setInputFocus] = useState(false);
+  const uid = useSelector(selectUID);
+  const photoURL = useSelector(selectPhotoURL);
+  const error = useSelector(selectError);
+  const posts = useSelector(selectPosts);
+  const renderedPost = posts.find((post) => post.id === postID);
+
+  const dispatch = useDispatch();
 
   const onCommentSubmit = () => {
     if (newComment.trim().length > 0) {
-      console.log("Comment is added to comments array");
-      setNewComment("");
-    } else {
-      console.log("some kind of comment validation error");
+      const formattedTimestamp = formatTimestamp(new Date()).toString();
+
+      const commentToAdd = {
+        commentText: newComment,
+        uid: uid,
+        photoURL: photoURL,
+        timestamp: formattedTimestamp,
+        id: uuid.v4(),
+      };
+      dispatch(addComment({ comment: commentToAdd, postID: postID }));
+      if (!error) {
+        setNewComment("");
+        Keyboard.dismiss();
+      }
     }
   };
 
@@ -31,11 +58,11 @@ const CommentsScreen = ({ route }) => {
     <View>
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.container}>
-          <Image source={post.image} style={styles.image} />
+          <Image source={{ uri: renderedPost.image }} style={styles.image} />
           <FlatList
-            data={post.comments}
+            data={renderedPost.comments}
             renderItem={({ item }) => <Comment comment={item} />}
-            keyExtractor={(item) => item.commentID}
+            keyExtractor={(item) => item.id}
             showsVerticalScrollIndicator={false}
             scrollEnabled={false}
           />

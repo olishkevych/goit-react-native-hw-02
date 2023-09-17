@@ -1,18 +1,28 @@
 import React from "react";
-import { View, Text, Image, StyleSheet, Pressable } from "react-native";
-import { Feather } from "@expo/vector-icons";
-import testAvatar from "../img/testAvatar.jpg";
+import { useSelector } from "react-redux";
+import { View, Text, Image, StyleSheet } from "react-native";
+import { selectPhotoURL, selectUID } from "../redux/selectors";
 import userPic from "../img/userPic.jpg";
 
 const Comment = ({ comment }) => {
-  const userID = "user2";
-  const isOwnersComment = userID === comment.userID;
+  const uid = useSelector(selectUID);
+  const photoURL = useSelector(selectPhotoURL);
+  const isOwnersComment = uid === comment.uid;
+
   return (
     <View
       style={[styles.commentWrap, isOwnersComment && styles.commentWrapRight]}
     >
       <Image
-        source={isOwnersComment ? testAvatar : comment.userAvatar || userPic}
+        source={
+          isOwnersComment
+            ? photoURL
+              ? { uri: photoURL }
+              : userPic
+            : comment.photoURL
+            ? { uri: comment.photoURL }
+            : userPic
+        }
         style={styles.avatar}
       />
       <View
@@ -21,7 +31,7 @@ const Comment = ({ comment }) => {
           isOwnersComment && styles.commentTextWrapRight,
         ]}
       >
-        <Text style={styles.commentText}>{comment.text}</Text>
+        <Text style={styles.commentText}>{comment.commentText}</Text>
         <Text
           style={[styles.timestamp, isOwnersComment && styles.timestampRight]}
         >

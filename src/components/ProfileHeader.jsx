@@ -1,4 +1,7 @@
 import React, { useState } from "react";
+import { useNavigation } from "@react-navigation/native";
+import { useSelector, useDispatch } from "react-redux";
+import * as ImagePicker from "expo-image-picker";
 import {
   View,
   Text,
@@ -7,19 +10,23 @@ import {
   Pressable,
   ImageBackground,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
-import * as ImagePicker from "expo-image-picker";
 import { AntDesign, Feather } from "@expo/vector-icons";
 
-import userPic from "../img/userPic.jpg";
-import testAvatar from "../img/test3.jpg";
+import { selectDisplayName, selectPhotoURL } from "../redux/selectors";
+import { logout, uploadNewAvatar } from "../redux/operations";
+import getBlobFromUri from "../helpers/getBlobFromUri";
+import manageFileUpload from "../helpers/manageFileUpload";
+
 import BackgroundImg from "../img/background.png";
-import user from "../data/userData";
+import userPic from "../img/userPic.jpg";
 
 const ProfileHeader = () => {
-  const [image, setImage] = useState(testAvatar);
+  const [image, setImage] = useState(null);
+  const displayName = useSelector(selectDisplayName);
+  const photoURL = useSelector(selectPhotoURL);
 
   const navigation = useNavigation();
+  const dispatch = useDispatch();
 
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -31,12 +38,31 @@ const ProfileHeader = () => {
 
     if (!result.canceled) {
       setImage(result.assets[0].uri);
+      await handleCloudImageUpload(result.assets[0].uri);
     }
+  };
+
+  const handleCloudImageUpload = async (uploadedImg) => {
+    const blob = await getBlobFromUri(uploadedImg);
+    manageFileUpload(blob, onImageUploadComplete);
+  };
+
+  const onImageUploadComplete = async (imgURL) => {
+    dispatch(uploadNewAvatar(imgURL));
   };
 
   const removeImage = () => {
     setImage(null);
+    dispatch(uploadNewAvatar(null));
   };
+
+  const handleLogout = () => {
+    dispatch(logout());
+    navigation.navigate("Login", {
+      screen: "BottomNav",
+    });
+  };
+
   return (
     <View style={styles.profileHeaderWrap}>
       <ImageBackground
@@ -46,11 +72,7 @@ const ProfileHeader = () => {
       ></ImageBackground>
       <View style={styles.contentWrap}>
         <Pressable
-          onPress={() =>
-            navigation.navigate("Login", {
-              screen: "BottomNav",
-            })
-          }
+          onPress={handleLogout}
           style={({ pressed }) => [
             styles.logout,
             pressed && styles.logoutPressed,
@@ -60,9 +82,14 @@ const ProfileHeader = () => {
         </Pressable>
         <View style={styles.avatarWrap}>
           <View style={styles.avatar}>
-            {image && <Image source={testAvatar} style={styles.avatar} />}
+            <Image
+              source={
+                image ? { uri: image } : photoURL ? { uri: photoURL } : userPic
+              }
+              style={styles.avatar}
+            />
           </View>
-          {image ? (
+          {image || photoURL ? (
             <Pressable
               onPress={removeImage}
               style={({ pressed }) => [
@@ -88,7 +115,7 @@ const ProfileHeader = () => {
             </Pressable>
           )}
         </View>
-        <Text style={styles.username}>{user.username}</Text>
+        <Text style={styles.username}>{displayName}</Text>
       </View>
     </View>
   );

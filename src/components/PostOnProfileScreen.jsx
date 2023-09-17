@@ -8,12 +8,12 @@ const PostOnProfileScreen = ({ post }) => {
   const { coords } = post;
   return (
     <View style={styles.post}>
-      <Image style={styles.postImage} source={post.image} />
+      <Image style={styles.postImage} source={{ uri: post.image }} />
       <Text style={styles.title}>{post.title}</Text>
       <View style={styles.postData}>
         <View style={styles.statsWrap}>
           <Pressable
-            onPress={() => navigation.navigate("Comments", { post: post })}
+            onPress={() => navigation.navigate("Comments", { postID: post.id })}
             style={({ pressed }) => [
               styles.commentsWrap,
               pressed && styles.pressedStyle,
@@ -50,7 +50,7 @@ const PostOnProfileScreen = ({ post }) => {
             color="#BDBDBD"
             style={styles.grayIcon}
           />
-          <Text style={styles.location}>{post.location}</Text>
+          <Text style={styles.location}>{post.locationName}</Text>
         </Pressable>
       </View>
     </View>

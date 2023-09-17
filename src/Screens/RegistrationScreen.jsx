@@ -1,5 +1,7 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
+import { useDispatch, useSelector } from "react-redux";
+import * as ImagePicker from "expo-image-picker";
 import {
   TouchableOpacity,
   View,
@@ -13,17 +15,31 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
 } from "react-native";
-import * as ImagePicker from "expo-image-picker";
-import BackgroundImg from "../img/background.png";
+import { register } from "../redux/operations";
+import { selectAuthError, selectIsAuthorized } from "../redux/selectors";
+import manageFileUpload from "../helpers/manageFileUpload";
+import getBlobFromUri from "../helpers/getBlobFromUri";
+import { showAlert } from "../helpers/showAlert";
+
 import { AntDesign } from "@expo/vector-icons";
+import BackgroundImg from "../img/background.png";
 
 const RegistrationScreen = () => {
   const [image, setImage] = useState(null);
   const [hidePassword, setHidePassword] = useState(true);
   const [inputFocus, setInputFocus] = useState({});
   const [userData, setUserData] = useState({});
+  const authError = useSelector(selectAuthError);
+  const isAuthorized = useSelector(selectIsAuthorized);
 
   const navigation = useNavigation();
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    if (isAuthorized) {
+      navigation.navigate("BottomNav", { screen: "Posts" });
+    }
+  }, [isAuthorized]);
 
   const managePasswordVisibility = () => {
     setHidePassword(!hidePassword);
@@ -33,10 +49,49 @@ const RegistrationScreen = () => {
     setUserData({ ...userData, [field]: newText });
   };
 
-  const handleSignInClick = () => {
-    console.log(userData);
-    setUserData({});
-    navigation.navigate("BottomNav", { screen: "Posts" });
+  const handleCloudImageUpload = async () => {
+    const blob = await getBlobFromUri(image);
+    manageFileUpload(blob, onImageUploadComplete);
+  };
+
+  const onImageUploadComplete = async (imgURL) => {
+    const newUser = {
+      ...userData,
+      photoURL: imgURL,
+    };
+    dispatch(register(newUser));
+    if (!authError) {
+      setUserData({});
+      navigation.navigate("BottomNav", { screen: "Posts" });
+    }
+
+    if (authError) {
+      showAlert(authError);
+    }
+  };
+
+  const handleSignUpClick = async () => {
+    if (
+      !userData.displayName ||
+      !userData.email ||
+      !userData.password === true
+    ) {
+      showAlert("Please fill all the fields");
+      return;
+    }
+
+    if (image) {
+      await handleCloudImageUpload();
+    } else {
+      dispatch(register(userData));
+      if (!authError) {
+        setUserData({});
+        navigation.navigate("BottomNav", { screen: "Posts" });
+      }
+      if (authError) {
+        showAlert(authError);
+      }
+    }
   };
 
   const onFocus = (field) => {
@@ -130,12 +185,14 @@ const RegistrationScreen = () => {
                   placeholderTextColor={"#BDBDBD"}
                   style={[
                     styles.input,
-                    inputFocus.username && styles.focusedInput,
+                    inputFocus.displayName && styles.focusedInput,
                   ]}
-                  onFocus={() => onFocus("username")}
-                  onBlur={() => onBlur("username")}
-                  onChangeText={(text) => handleInputChange("username", text)}
-                  defaultValue={userData.username}
+                  onFocus={() => onFocus("displayName")}
+                  onBlur={() => onBlur("displayName")}
+                  onChangeText={(text) =>
+                    handleInputChange("displayName", text)
+                  }
+                  defaultValue={userData.displayName}
                 ></TextInput>
                 <TextInput
                   placeholder="Email"
@@ -174,7 +231,7 @@ const RegistrationScreen = () => {
                   </TouchableOpacity>
                 </View>
                 <Pressable
-                  onPress={handleSignInClick}
+                  onPress={handleSignUpClick}
                   style={({ pressed }) => [
                     styles.primaryBtn,
                     pressed && styles.primaryBtnPressed,

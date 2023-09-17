@@ -7,7 +7,6 @@ import RegistrationScreen from "../Screens/RegistrationScreen";
 import CommentsScreen from "../Screens/CommentsScreen";
 import HeaderNav from "../components/HeaderNav";
 import MapScreen from "../Screens/MapScreen";
-import CreatePostsScreen from "../Screens/CreatePostsScreen";
 
 const RootNav = () => {
   const Stack = createStackNavigator();

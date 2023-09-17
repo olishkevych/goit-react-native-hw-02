@@ -1,7 +1,9 @@
-import React, { useState, useEffect, useRef } from "react";
-import { FontAwesome5 } from "@expo/vector-icons";
+import React, { useState, useEffect } from "react";
+import { useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
 import { useNavigation } from "@react-navigation/native";
-import { Camera, CameraOrientation } from "expo-camera";
+import { Camera } from "expo-camera";
+import { FontAwesome5 } from "@expo/vector-icons";
 
 import * as MediaLibrary from "expo-media-library";
 import * as Location from "expo-location";
@@ -15,22 +17,29 @@ import {
   TextInput,
   TouchableWithoutFeedback,
   Keyboard,
-  TouchableOpacity,
-  Dimensions,
   ActivityIndicator,
 } from "react-native";
-import * as ImagePicker from "expo-image-picker";
-import { Feather } from "@expo/vector-icons";
 
-import posts from "../data/postsData";
+import { addPost } from "../redux/operations";
+import manageFileUpload from "../helpers/manageFileUpload";
+import getBlobFromUri from "../helpers/getBlobFromUri";
+import { showAlert } from "../helpers/showAlert";
+import { selectUID } from "../redux/selectors";
+
+import { Feather } from "@expo/vector-icons";
 
 const CreatePostsScreen = () => {
   const [postData, setPostData] = useState({});
+  const [imgURI, setImgURI] = useState(null);
   const [inputFocus, setInputFocus] = useState({});
   const [hasPermission, setHasPermission] = useState(null);
   const [cameraRef, setCameraRef] = useState(null);
   const [isCameraActive, setIsCameraActive] = useState(true);
   const [type, setType] = useState(Camera.Constants.Type.back);
+  const uid = useSelector(selectUID);
+
+  const dispatch = useDispatch();
+  const navigation = useNavigation();
 
   useEffect(() => {
     (async () => {
@@ -38,9 +47,7 @@ const CreatePostsScreen = () => {
         const { status } = await Camera.requestCameraPermissionsAsync();
         await MediaLibrary.requestPermissionsAsync();
         setHasPermission(status === "granted");
-      } catch (error) {
-        console.log(error);
-      }
+      } catch (error) {}
     })();
   }, []);
 
@@ -48,42 +55,74 @@ const CreatePostsScreen = () => {
     (async () => {
       try {
         let status = await Location.requestForegroundPermissionsAsync();
-      } catch (e) {
-        console.log("Permission to access location was denied");
-      }
+      } catch (e) {}
     })();
   }, []);
 
-  const navigation = useNavigation();
-
   const isPostComplete = () => {
-    return postData.image &&
+    return imgURI &&
       postData.title &&
-      postData.location &&
+      postData.locationName &&
       postData.title.length > 0 &&
-      postData.location.length > 0
+      postData.locationName.length > 0
       ? true
       : false;
+  };
+
+  const handleCloudImageUpload = async () => {
+    const blob = await getBlobFromUri(imgURI);
+    manageFileUpload(blob, onImageUploadComplete);
+  };
+
+  const onImageUploadComplete = async (imgURL) => {
+    const coords = await getLocation();
+    const postToAdd = {
+      ...postData,
+      coords,
+      userID: uid,
+      likes: 0,
+      comments: [],
+      image: imgURL,
+    };
+    dispatch(addPost(postToAdd));
   };
 
   const handleCameraPress = async () => {
     if (cameraRef) {
       try {
         setIsCameraActive(false);
-
         const { uri } = await cameraRef.takePictureAsync();
         await cameraRef.pausePreview();
         await MediaLibrary.createAssetAsync(uri);
-
-        setPostData({ ...postData, image: uri });
+        setImgURI(uri);
       } catch (error) {
-        console.error(error);
+        showAlert("Something went wrong. Try again");
       }
     }
   };
+  const getLocation = async () => {
+    try {
+      let location = await Location.getCurrentPositionAsync({});
+      const coords = {
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+      };
+      return coords;
+    } catch (error) {
+      showAlert("Could not get location");
+    }
+  };
+
+  const onSavePost = async () => {
+    await handleCloudImageUpload();
+    setPostData({});
+    setImgURI(null);
+    navigation.navigate("Posts");
+    setIsCameraActive(true);
+  };
 
   const onDeletePhoto = () => {
-    setPostData({ ...postData, image: null });
+    setImgURI(null);
     setIsCameraActive(true);
   };
 
@@ -104,30 +143,7 @@ const CreatePostsScreen = () => {
   const onDeleteDraft = () => {
     setIsCameraActive(true);
     setPostData({});
-  };
-
-  const onSavePost = async () => {
-    try {
-      let location = await Location.getCurrentPositionAsync({});
-      const coords = {
-        latitude: location.coords.latitude,
-        longitude: location.coords.longitude,
-      };
-      setPostData({ ...postData, coords });
-    } catch (error) {
-      console.error(error);
-    }
-    const postToAdd = {
-      ...postData,
-      id: Date.now(),
-      userID: "user2",
-      likes: 0,
-      comments: [],
-    };
-    posts.push(postToAdd);
-    setPostData({});
-    navigation.navigate("Posts");
-    setIsCameraActive(true);
+    setImgURI(null);
   };
 
   const handleInputChange = (field, newText) => {
@@ -138,9 +154,9 @@ const CreatePostsScreen = () => {
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View style={styles.container}>
         <View>
-          {postData.image && (
+          {imgURI && (
             <View style={styles.postImgContainer}>
-              <Image source={{ uri: postData.image }} style={styles.image} />
+              <Image source={{ uri: imgURI }} style={styles.image} />
               <Pressable
                 onPress={onDeletePhoto}
                 style={({ pressed }) => [
@@ -153,7 +169,7 @@ const CreatePostsScreen = () => {
             </View>
           )}
 
-          {!postData.image && (
+          {!imgURI && (
             <Camera
               ref={setCameraRef}
               type={type}
@@ -200,7 +216,7 @@ const CreatePostsScreen = () => {
             </Camera>
           )}
           <Text style={styles.grayText}>
-            {postData.image ? "Take a new photo" : "Take a photo"}
+            {imgURI ? "Take a new photo" : "Take a photo"}
           </Text>
           <View style={styles.inputWrap}>
             <TextInput
@@ -227,17 +243,17 @@ const CreatePostsScreen = () => {
               style={[
                 styles.input,
                 styles.locationInput,
-                inputFocus.location && styles.focusedInput,
+                inputFocus.locationName && styles.focusedInput,
               ]}
-              onFocus={() => onFocus("location")}
-              onBlur={() => onBlur("location")}
-              onChangeText={(text) => handleInputChange("location", text)}
-              defaultValue={postData.location}
+              onFocus={() => onFocus("locationName")}
+              onBlur={() => onBlur("locationName")}
+              onChangeText={(text) => handleInputChange("locationName", text)}
+              defaultValue={postData.locationName}
             />
           </View>
           <Pressable
             onPress={onSavePost}
-            // disabled={isPostComplete() ? false : true}
+            disabled={isPostComplete() ? false : true}
             style={({ pressed }) => [
               styles.publishButton,
               isPostComplete() && styles.publishButtonActive,
@@ -245,13 +261,7 @@ const CreatePostsScreen = () => {
             ]}
           >
             <Text
-              style={[
-                styles.btnText,
-                postData.image &&
-                  postData.title &&
-                  postData.location &&
-                  styles.btnTextActive,
-              ]}
+              style={[styles.btnText, isPostComplete() && styles.btnTextActive]}
             >
               Save
             </Text>

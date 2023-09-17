@@ -5,14 +5,15 @@ import { Feather } from "@expo/vector-icons";
 
 const PostOnPostScr = ({ post }) => {
   const navigation = useNavigation();
-  const { coords } = post;
+  const { coords, locationName } = post;
+
   return (
     <View style={styles.post}>
-      <Image style={styles.postImage} source={post.image} />
+      <Image style={styles.postImage} source={{ uri: post.image }} />
       <Text style={styles.title}>{post.title}</Text>
       <View style={styles.postData}>
         <Pressable
-          onPress={() => navigation.navigate("Comments", { post: post })}
+          onPress={() => navigation.navigate("Comments", { postID: post.id })}
           style={({ pressed }) => [
             styles.commentsWrap,
             pressed && styles.pressedStyle,
@@ -27,7 +28,7 @@ const PostOnPostScr = ({ post }) => {
           <Text style={styles.commentsNumber}>{post.comments.length}</Text>
         </Pressable>
         <Pressable
-          onPress={(post) => navigation.navigate("Map", { coords: coords })}
+          onPress={() => navigation.navigate("Map", { coords: coords })}
           style={({ pressed }) => [
             styles.locationWrap,
             pressed && styles.pressedStyle,
@@ -39,7 +40,7 @@ const PostOnPostScr = ({ post }) => {
             color="#BDBDBD"
             style={styles.grayIcon}
           />
-          <Text style={styles.location}>{post.location}</Text>
+          <Text style={styles.location}>{locationName}</Text>
         </Pressable>
       </View>
     </View>
@@ -52,7 +53,6 @@ const styles = StyleSheet.create({
     height: 240,
     width: "100%",
     borderRadius: 8,
-
     marginBottom: 2,
   },
   title: {

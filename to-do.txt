@@ -1,7 +1,0 @@
-1. Editing post title;
-2. Deleting posts;
-3. Login/Registration validation;
-4. lazy loading for posts;
-5. scroll together with profile header in PostsScreen
-
-

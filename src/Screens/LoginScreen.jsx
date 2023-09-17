@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
+import { useDispatch, useSelector } from "react-redux";
 import {
   TouchableOpacity,
   View,
@@ -11,29 +12,51 @@ import {
   KeyboardAvoidingView,
   TouchableWithoutFeedback,
   Keyboard,
+  Alert,
 } from "react-native";
+import { login } from "../redux/operations";
+import { selectAuthError, selectIsAuthorized } from "../redux/selectors";
+import { showAlert } from "../helpers/showAlert";
 
 import BackgroundImg from "../img/background.png";
 
-const RegistrationScreen = () => {
+const LoginScreen = () => {
   const [hidePassword, setHidePassword] = useState(true);
   const [userData, setUserData] = useState({});
   const [inputFocus, setInputFocus] = useState({});
+  const authError = useSelector(selectAuthError);
+  const isAuthorized = useSelector(selectIsAuthorized);
 
   const navigation = useNavigation();
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    if (isAuthorized) {
+      navigation.navigate("BottomNav", { screen: "Posts" });
+    }
+  }, [isAuthorized]);
 
   const managePasswordVisibility = () => {
     setHidePassword(!hidePassword);
   };
 
-  const handleInputChange = (field, newText) => {
-    setUserData({ ...userData, [field]: newText });
+  const handleLoginClick = () => {
+    if (userData.email && userData.password) {
+      dispatch(login(userData));
+
+      if (!authError) {
+        navigation.navigate("BottomNav", { screen: "Posts" });
+        setUserData({});
+      }
+
+      if (authError) {
+        showAlert(authError);
+      }
+    }
   };
 
-  const handleLoginClick = () => {
-    console.log(userData);
-    setUserData({});
-    navigation.navigate("BottomNav", { screen: "Posts" });
+  const handleInputChange = (field, newText) => {
+    setUserData({ ...userData, [field]: newText });
   };
 
   const onFocus = (field) => {
@@ -119,7 +142,10 @@ const RegistrationScreen = () => {
                 <View>
                   <TouchableOpacity
                     style={styles.secTxtWrap}
-                    onPress={() => navigation.navigate("Registration")}
+                    onPress={() => {
+                      setUserData({});
+                      navigation.navigate("Registration");
+                    }}
                   >
                     <Text style={styles.secText}>Don't have an account? </Text>
                     <Text style={[styles.secText, styles.underlined]}>
@@ -214,4 +240,4 @@ const styles = StyleSheet.create({
   hideBtnText: { color: "#1B4371", fontSize: 16 },
 });
 
-export default RegistrationScreen;
+export default LoginScreen;

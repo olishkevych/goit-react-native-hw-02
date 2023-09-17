@@ -1,16 +1,21 @@
 import { View, Text, StyleSheet, Pressable } from "react-native";
-import { Feather } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
+import { useDispatch } from "react-redux";
+import { logout } from "../redux/operations";
+
+import { Feather } from "@expo/vector-icons";
 
 const HeaderNav = ({ title }) => {
   const navigation = useNavigation();
+  const dispatch = useDispatch();
 
   const handleLogout = () => {
-    console.log("Logout");
+    dispatch(logout());
     navigation.navigate("Login", {
       screen: "BottomNav",
     });
   };
+
   return (
     <View style={styles.header}>
       <Text style={styles.headerTxt}>{title}</Text>

@@ -1,27 +1,13 @@
-import React, { useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  Image,
-  Pressable,
-  ImageBackground,
-  ScrollView,
-  FlatList,
-} from "react-native";
-import { useNavigation } from "@react-navigation/native";
-import * as ImagePicker from "expo-image-picker";
-import { AntDesign } from "@expo/vector-icons";
-
-import userPic from "../img/userPic.jpg";
-import testAvatar from "../img/test3.jpg";
-import BackgroundImg from "../img/background.png";
-import user from "../data/userData";
-import posts from "../data/postsData";
+import React, { useEffect } from "react";
+import { useSelector } from "react-redux";
+import { StyleSheet, FlatList } from "react-native";
 import PostOnProfileScreen from "../components/PostOnProfileScreen";
 import ProfileHeader from "../components/ProfileHeader";
+import { selectPosts } from "../redux/selectors";
 
 const ProfileScreen = () => {
+  const posts = useSelector(selectPosts);
+
   return (
     <FlatList
       data={posts}

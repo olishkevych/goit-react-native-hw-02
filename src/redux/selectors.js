@@ -1,0 +1,10 @@
+export const selectPosts = (state) => state.posts.posts;
+export const selectIsLoading = (state) => state.posts.isLoading;
+export const selectError = (state) => state.posts.error;
+export const selectPostToAdd = (state) => state.posts.postToAdd;
+export const selectAuthError = (state) => state.user.authError;
+export const selectUserEmail = (state) => state.user.email;
+export const selectDisplayName = (state) => state.user.displayName;
+export const selectPhotoURL = (state) => state.user.photoURL;
+export const selectIsAuthorized = (state) => state.user.isAuthorized;
+export const selectUID = (state) => state.user.uid;

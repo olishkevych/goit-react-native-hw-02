@@ -1,10 +1,10 @@
 import React from "react";
-import { View, Text, StyleSheet, Dimensions } from "react-native";
+import { View, StyleSheet, Dimensions } from "react-native";
 import MapView, { PROVIDER_GOOGLE, Marker } from "react-native-maps";
 
 const MapScreen = ({ route }) => {
   const { coords } = route.params;
-  console.log(coords);
+
   return (
     <View>
       <MapView

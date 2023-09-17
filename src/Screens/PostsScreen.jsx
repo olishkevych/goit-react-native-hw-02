@@ -1,25 +1,44 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { View, Text, Image, StyleSheet, FlatList } from "react-native";
+
+import {
+  selectDisplayName,
+  selectPosts,
+  selectUserEmail,
+  selectPhotoURL,
+  selectUID,
+} from "../redux/selectors";
+import { getPosts } from "../redux/operations";
 import PostOnPostScr from "../components/PostOnPostScr";
 import userPic from "../img/userPic.jpg";
 
-import user from "../data/userData";
-import posts from "../data/postsData";
-
 const PostsScreen = () => {
+  const dispatch = useDispatch();
+  const posts = useSelector(selectPosts);
+  const displayName = useSelector(selectDisplayName);
+  const email = useSelector(selectUserEmail);
+  const photoURL = useSelector(selectPhotoURL);
+  const uid = useSelector(selectUID);
+
+  useEffect(() => {
+    dispatch(getPosts(uid));
+  }, [dispatch, uid]);
+
   return (
     <View style={styles.container}>
       <View style={styles.profileWrap}>
         <Image
-          source={user.avatar ? user.avatar : userPic}
+          source={photoURL ? { uri: photoURL } : userPic}
           style={styles.avatar}
           resizeMethod="scale"
         />
         <View style={styles.userInfo}>
-          <Text style={styles.username}>{user.username}</Text>
-          <Text style={styles.email}>{user.email}</Text>
+          <Text style={styles.username}>{displayName}</Text>
+          <Text style={styles.email}>{email}</Text>
         </View>
       </View>
+      {posts.length === 0 && <Text>No posts yet...</Text>}
       <FlatList
         data={posts}
         showsVerticalScrollIndicator={false}
