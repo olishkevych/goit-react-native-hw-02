@@ -55,7 +55,7 @@ const CommentsScreen = ({ route }) => {
   };
 
   return (
-    <View>
+    <View style={styles.outerContainer}>
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.container}>
           <Image source={{ uri: renderedPost.image }} style={styles.image} />
@@ -95,10 +95,13 @@ const CommentsScreen = ({ route }) => {
 };
 
 const styles = StyleSheet.create({
+  outerContainer: {
+    flex: 1,
+    backgroundColor: "#FFF",
+  },
   container: {
     flex: 1,
-    minHeight: 672,
-    backgroundColor: "white",
+    backgroundColor: "#FFF",
     paddingHorizontal: 16,
     paddingTop: 32,
     paddingBottom: 82,
@@ -110,7 +113,6 @@ const styles = StyleSheet.create({
     marginBottom: 32,
   },
   commentWrap: {
-    position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,

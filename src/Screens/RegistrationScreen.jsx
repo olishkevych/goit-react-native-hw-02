@@ -16,10 +16,9 @@ import {
   Keyboard,
 } from "react-native";
 import { register } from "../redux/operations";
-import { selectAuthError, selectIsAuthorized } from "../redux/selectors";
+
 import manageFileUpload from "../helpers/manageFileUpload";
 import getBlobFromUri from "../helpers/getBlobFromUri";
-import { showAlert } from "../helpers/showAlert";
 
 import { AntDesign } from "@expo/vector-icons";
 import BackgroundImg from "../img/background.png";
@@ -32,18 +31,17 @@ const RegistrationScreen = () => {
   const [showEmailError, setShowEmailError] = useState(null);
   const [showPasswordError, setShowPasswordError] = useState(null);
   const [showUsernameError, setShowUsernameError] = useState(null);
-  const [showRegisterError, setShowRegisterError] = useState(false);
-  const authError = useSelector(selectAuthError);
-  const isAuthorized = useSelector(selectIsAuthorized);
+  const [regError, setRegError] = useState({});
+  const [isAuthorized, setIsAuthorized] = useState(false);
 
   const navigation = useNavigation();
   const dispatch = useDispatch();
 
   useEffect(() => {
-    // if (isAuthorized) {
-    //   navigation.navigate("BottomNav", { screen: "Posts" });
-    // }
-  }, [authError]);
+    if (isAuthorized) {
+      navigation.navigate("BottomNav", { screen: "Posts" });
+    }
+  }, [isAuthorized]);
 
   const managePasswordVisibility = () => {
     setHidePassword(!hidePassword);
@@ -59,29 +57,6 @@ const RegistrationScreen = () => {
     }
     if (field === "displayName") {
       setShowUsernameError(null);
-    }
-  };
-
-  const handleCloudImageUpload = async () => {
-    const blob = await getBlobFromUri(image);
-    manageFileUpload(blob, onImageUploadComplete);
-  };
-
-  const onImageUploadComplete = async (imgURL) => {
-    const newUser = {
-      ...userData,
-      photoURL: imgURL,
-    };
-    dispatch(register(newUser));
-
-    if (authError) {
-      setShowRegisterError(authError);
-      return;
-    }
-
-    if (!authError) {
-      // setUserData({});
-      // navigation.navigate("BottomNav", { screen: "Posts" });
     }
   };
 
@@ -125,31 +100,43 @@ const RegistrationScreen = () => {
   };
 
   const handleSignUpClick = () => {
-    setShowRegisterError(null);
     const isUserdataValid = verifyUserdata();
-
+    setRegError(null);
     if (isUserdataValid) {
       if (image) {
         handleCloudImageUpload();
         return;
       } else {
-        console.log("Dispatching");
-        dispatch(register(userData));
-        console.log("Dispatched");
-
-        if (!authError) {
-          setUserData({});
-          console.log("no error");
-          setShowRegisterError(null);
-        }
-
-        if (authError) {
-          console.log("yes error");
-          setShowRegisterError(authError);
-          return;
-        }
+        dispatchRegister(userData);
       }
     }
+  };
+
+  const dispatchRegister = (userData) =>
+    dispatch(register(userData))
+      .then((action) => {
+        if (action.error) {
+          throw new Error(action.payload);
+        }
+        if (!action.error) {
+          setUserData({});
+          setRegError(null);
+          setIsAuthorized(true);
+        }
+      })
+      .catch((error) => setRegError(error));
+
+  const handleCloudImageUpload = async () => {
+    const blob = await getBlobFromUri(image);
+    manageFileUpload(blob, onImageUploadComplete);
+  };
+
+  const onImageUploadComplete = async (imgURL) => {
+    const newUser = {
+      ...userData,
+      photoURL: imgURL,
+    };
+    dispatchRegister(newUser);
   };
 
   const onFocus = (field) => {
@@ -308,10 +295,8 @@ const RegistrationScreen = () => {
                   </TouchableOpacity>
                 </View>
                 <View>
-                  {showRegisterError && (
-                    <Text style={styles.registerError}>
-                      {showRegisterError}
-                    </Text>
+                  {regError && (
+                    <Text style={styles.registerError}>{regError.message}</Text>
                   )}
                   <Pressable
                     onPress={handleSignUpClick}
