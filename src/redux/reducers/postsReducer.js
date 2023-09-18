@@ -30,9 +30,9 @@ const postsReducer = createSlice({
         state.isLoading = true;
       })
       .addCase(getPosts.fulfilled, (state, { payload }) => {
+        state.isLoading = false;
         state.posts = payload;
         state.error = null;
-        state.isLoading = false;
       })
       .addCase(getPosts.rejected, (state, { payload }) => {
         state.error = payload;

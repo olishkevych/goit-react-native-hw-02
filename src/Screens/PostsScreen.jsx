@@ -8,10 +8,14 @@ import {
   selectUserEmail,
   selectPhotoURL,
   selectUID,
+  selectIsAuthorized,
+  selectIsLoading,
 } from "../redux/selectors";
 import { getPosts } from "../redux/operations";
 import PostOnPostScr from "../components/PostOnPostScr";
 import userPic from "../img/userPic.jpg";
+import { useNavigation } from "@react-navigation/native";
+import NoPostsText from "../components/NoPostsText";
 
 const PostsScreen = () => {
   const dispatch = useDispatch();
@@ -20,6 +24,7 @@ const PostsScreen = () => {
   const email = useSelector(selectUserEmail);
   const photoURL = useSelector(selectPhotoURL);
   const uid = useSelector(selectUID);
+  const isLoading = useSelector(selectIsLoading);
 
   useEffect(() => {
     dispatch(getPosts(uid));
@@ -38,12 +43,13 @@ const PostsScreen = () => {
           <Text style={styles.email}>{email}</Text>
         </View>
       </View>
-      {posts.length === 0 && <Text>No posts yet...</Text>}
+
       <FlatList
         data={posts}
         showsVerticalScrollIndicator={false}
         renderItem={({ item }) => <PostOnPostScr post={item} />}
         keyExtractor={(item) => item.id}
+        ListHeaderComponent={NoPostsText}
       />
     </View>
   );

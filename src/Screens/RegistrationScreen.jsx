@@ -29,6 +29,10 @@ const RegistrationScreen = () => {
   const [hidePassword, setHidePassword] = useState(true);
   const [inputFocus, setInputFocus] = useState({});
   const [userData, setUserData] = useState({});
+  const [showEmailError, setShowEmailError] = useState(null);
+  const [showPasswordError, setShowPasswordError] = useState(null);
+  const [showUsernameError, setShowUsernameError] = useState(null);
+  const [showRegisterError, setShowRegisterError] = useState(false);
   const authError = useSelector(selectAuthError);
   const isAuthorized = useSelector(selectIsAuthorized);
 
@@ -36,10 +40,10 @@ const RegistrationScreen = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    if (isAuthorized) {
-      navigation.navigate("BottomNav", { screen: "Posts" });
-    }
-  }, [isAuthorized]);
+    // if (isAuthorized) {
+    //   navigation.navigate("BottomNav", { screen: "Posts" });
+    // }
+  }, [authError]);
 
   const managePasswordVisibility = () => {
     setHidePassword(!hidePassword);
@@ -47,6 +51,15 @@ const RegistrationScreen = () => {
 
   const handleInputChange = (field, newText) => {
     setUserData({ ...userData, [field]: newText });
+    if (field === "email") {
+      setShowEmailError(null);
+    }
+    if (field === "password") {
+      setShowPasswordError(null);
+    }
+    if (field === "displayName") {
+      setShowUsernameError(null);
+    }
   };
 
   const handleCloudImageUpload = async () => {
@@ -60,36 +73,81 @@ const RegistrationScreen = () => {
       photoURL: imgURL,
     };
     dispatch(register(newUser));
-    if (!authError) {
-      setUserData({});
-      navigation.navigate("BottomNav", { screen: "Posts" });
-    }
 
     if (authError) {
-      showAlert(authError);
-    }
-  };
-
-  const handleSignUpClick = async () => {
-    if (
-      !userData.displayName ||
-      !userData.email ||
-      !userData.password === true
-    ) {
-      showAlert("Please fill all the fields");
+      setShowRegisterError(authError);
       return;
     }
 
-    if (image) {
-      await handleCloudImageUpload();
-    } else {
-      dispatch(register(userData));
-      if (!authError) {
-        setUserData({});
-        navigation.navigate("BottomNav", { screen: "Posts" });
-      }
-      if (authError) {
-        showAlert(authError);
+    if (!authError) {
+      // setUserData({});
+      // navigation.navigate("BottomNav", { screen: "Posts" });
+    }
+  };
+
+  const verifyUserdata = () => {
+    const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+
+    if (emailRegex.test(userData.email)) {
+      setShowEmailError(null);
+    }
+
+    if (!userData.displayName || userData.displayName.length === 0) {
+      setShowUsernameError("Fill in your username");
+      return false;
+    }
+
+    if (userData.displayName && userData.displayName.length === 0) {
+      setShowUsernameError(null);
+      return false;
+    }
+
+    if (!userData.email || userData.email.length === 0) {
+      setShowEmailError("Fill in your email");
+      return false;
+    }
+
+    if (!emailRegex.test(userData.email)) {
+      setShowEmailError("Please enter a valid email address");
+      return false;
+    }
+
+    if (!userData.password) {
+      setShowPasswordError("Fill in your password");
+      return false;
+    }
+
+    if (userData.password.length < 8) {
+      setShowPasswordError("Password must be at least 8 characters");
+      return false;
+    }
+    return true;
+  };
+
+  const handleSignUpClick = () => {
+    setShowRegisterError(null);
+    const isUserdataValid = verifyUserdata();
+
+    if (isUserdataValid) {
+      if (image) {
+        handleCloudImageUpload();
+        return;
+      } else {
+        console.log("Dispatching");
+        dispatch(register(userData));
+        console.log("Dispatched");
+
+        if (!authError) {
+          setUserData({});
+          console.log("no error");
+          setShowRegisterError(null);
+        }
+
+        if (authError) {
+          console.log("yes error");
+          setShowRegisterError(authError);
+          return;
+        }
       }
     }
   };
@@ -180,47 +238,66 @@ const RegistrationScreen = () => {
               </View>
               <View>
                 <Text style={styles.formHeader}>{"Create an account"}</Text>
-                <TextInput
-                  placeholder="Username"
-                  placeholderTextColor={"#BDBDBD"}
-                  style={[
-                    styles.input,
-                    inputFocus.displayName && styles.focusedInput,
-                  ]}
-                  onFocus={() => onFocus("displayName")}
-                  onBlur={() => onBlur("displayName")}
-                  onChangeText={(text) =>
-                    handleInputChange("displayName", text)
-                  }
-                  defaultValue={userData.displayName}
-                ></TextInput>
-                <TextInput
-                  placeholder="Email"
-                  inputMode="email"
-                  placeholderTextColor={"#BDBDBD"}
-                  style={[
-                    styles.input,
-                    inputFocus.email && styles.focusedInput,
-                  ]}
-                  onFocus={() => onFocus("email")}
-                  onBlur={() => onBlur("email")}
-                  onChangeText={(text) => handleInputChange("email", text)}
-                  defaultValue={userData.email}
-                ></TextInput>
+                <View>
+                  <View>
+                    <TextInput
+                      placeholder="Username"
+                      placeholderTextColor={"#BDBDBD"}
+                      style={[
+                        styles.input,
+                        inputFocus.displayName && styles.focusedInput,
+                      ]}
+                      onFocus={() => onFocus("displayName")}
+                      onBlur={() => onBlur("displayName")}
+                      onChangeText={(text) =>
+                        handleInputChange("displayName", text)
+                      }
+                      defaultValue={userData.displayName}
+                    ></TextInput>
+                    {showUsernameError && (
+                      <Text style={styles.fieldError}>{showUsernameError}</Text>
+                    )}
+                  </View>
+                </View>
                 <View>
                   <TextInput
-                    placeholder="Password"
-                    secureTextEntry={hidePassword}
+                    placeholder="Email"
+                    inputMode="email"
                     placeholderTextColor={"#BDBDBD"}
                     style={[
                       styles.input,
-                      inputFocus.password && styles.focusedInput,
+                      inputFocus.email && styles.focusedInput,
                     ]}
-                    onFocus={() => onFocus("password")}
-                    onBlur={() => onBlur("password")}
-                    onChangeText={(text) => handleInputChange("password", text)}
-                    defaultValue={userData.password}
+                    onFocus={() => onFocus("email")}
+                    onBlur={() => onBlur("email")}
+                    onChangeText={(text) => handleInputChange("email", text)}
+                    defaultValue={userData.email}
                   ></TextInput>
+                  {showEmailError && (
+                    <Text style={styles.fieldError}>{showEmailError}</Text>
+                  )}
+                </View>
+                <View>
+                  <View>
+                    <TextInput
+                      placeholder="Password"
+                      secureTextEntry={hidePassword}
+                      placeholderTextColor={"#BDBDBD"}
+                      style={[
+                        styles.input,
+                        inputFocus.password && styles.focusedInput,
+                      ]}
+                      onFocus={() => onFocus("password")}
+                      onBlur={() => onBlur("password")}
+                      onChangeText={(text) =>
+                        handleInputChange("password", text)
+                      }
+                      defaultValue={userData.password}
+                    ></TextInput>
+                    {showPasswordError && (
+                      <Text style={styles.fieldError}>{showPasswordError}</Text>
+                    )}
+                  </View>
                   <TouchableOpacity
                     onPress={() => managePasswordVisibility()}
                     style={styles.hideBtn}
@@ -230,15 +307,22 @@ const RegistrationScreen = () => {
                     </Text>
                   </TouchableOpacity>
                 </View>
-                <Pressable
-                  onPress={handleSignUpClick}
-                  style={({ pressed }) => [
-                    styles.primaryBtn,
-                    pressed && styles.primaryBtnPressed,
-                  ]}
-                >
-                  <Text style={styles.btnText}>{"Sign up"}</Text>
-                </Pressable>
+                <View>
+                  {showRegisterError && (
+                    <Text style={styles.registerError}>
+                      {showRegisterError}
+                    </Text>
+                  )}
+                  <Pressable
+                    onPress={handleSignUpClick}
+                    style={({ pressed }) => [
+                      styles.primaryBtn,
+                      pressed && styles.primaryBtnPressed,
+                    ]}
+                  >
+                    <Text style={styles.btnText}>{"Sign up"}</Text>
+                  </Pressable>
+                </View>
                 <View>
                   <TouchableOpacity
                     style={styles.secTxtWrap}
@@ -378,6 +462,20 @@ const styles = StyleSheet.create({
     textDecorationColor: "#1B4371",
   },
   hideBtnText: { color: "#1B4371", fontSize: 16 },
+  fieldError: {
+    color: "red",
+    fontSize: 14,
+    position: "absolute",
+    left: 10,
+    top: -17,
+  },
+  registerError: {
+    color: "red",
+    fontSize: 16,
+    position: "absolute",
+    width: "100%",
+    textAlign: "center",
+  },
 });
 
 export default RegistrationScreen;

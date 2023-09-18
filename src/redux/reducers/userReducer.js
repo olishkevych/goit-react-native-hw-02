@@ -1,11 +1,17 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { register, login, logout, uploadNewAvatar } from "../operations";
+import {
+  register,
+  login,
+  logout,
+  uploadNewAvatar,
+  resetAuthError,
+} from "../operations";
 
 const initialState = {
-  displayName: "",
-  email: "",
-  photoURL: "",
-  uid: "",
+  displayName: null,
+  email: null,
+  photoURL: null,
+  uid: null,
   isAuthorized: false,
   authError: null,
   isLoading: false,
@@ -19,9 +25,11 @@ const userReducer = createSlice({
       .addCase(register.pending, (state) => {
         state.authError = null;
         state.isLoading = true;
+        state.isAuthorized = false;
       })
       .addCase(register.fulfilled, (state, { payload }) => {
         const { email, displayName, photoURL, uid } = payload;
+        console.log("fulfilled");
         state.email = email;
         state.displayName = displayName;
         state.photoURL = photoURL;
@@ -31,6 +39,8 @@ const userReducer = createSlice({
         state.isLoading = false;
       })
       .addCase(register.rejected, (state, { payload }) => {
+        console.log("rejected");
+
         state.authError = payload;
         state.isAuthorized = false;
         state.isLoading = false;
@@ -38,6 +48,7 @@ const userReducer = createSlice({
       .addCase(login.pending, (state) => {
         state.authError = null;
         state.isLoading = true;
+        state.isAuthorized = false;
       })
       .addCase(login.fulfilled, (state, { payload }) => {
         const { email, displayName, uid, photoURL } = payload;
@@ -73,7 +84,7 @@ const userReducer = createSlice({
         state.displayName = null;
         state.email = null;
         state.photoURL = null;
-        state.isAuthorized = false;
+        state.isAuthorized = true;
         state.isLoading = false;
       })
       .addCase(uploadNewAvatar.pending, (state) => {
@@ -88,6 +99,15 @@ const userReducer = createSlice({
       .addCase(uploadNewAvatar.rejected, (state, { payload }) => {
         state.isLoading = false;
         state.authError = payload;
+      })
+      .addCase(resetAuthError.pending, (state) => {
+        state.authError = null;
+      })
+      .addCase(resetAuthError.fulfilled, (state) => {
+        state.authError = null;
+      })
+      .addCase(resetAuthError.rejected, (state) => {
+        state.authError = null;
       });
   },
 });

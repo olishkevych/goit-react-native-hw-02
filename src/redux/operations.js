@@ -151,7 +151,7 @@ export const login = createAsyncThunk(
     try {
       await signInWithEmailAndPassword(auth, email, password);
       const user = auth.currentUser;
-
+      console.log(user.email);
       return {
         email: user.email,
         displayName: user.displayName,
@@ -160,6 +160,17 @@ export const login = createAsyncThunk(
       };
     } catch (error) {
       return thunkAPI.rejectWithValue("Please check your email and password");
+    }
+  }
+);
+
+export const resetAuthError = createAsyncThunk(
+  "user/resetAuthError",
+  async (_, thunkAPI) => {
+    try {
+      return null;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.message);
     }
   }
 );

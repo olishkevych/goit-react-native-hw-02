@@ -1,13 +1,16 @@
 import { View, Text, StyleSheet, Pressable } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../redux/operations";
 
 import { Feather } from "@expo/vector-icons";
+import { selectIsAuthorized } from "../redux/selectors";
+import { useEffect } from "react";
 
 const HeaderNav = ({ title }) => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
+  const isAuthorized = useSelector(selectIsAuthorized);
 
   const handleLogout = () => {
     dispatch(logout());

@@ -12,7 +12,11 @@ import {
 } from "react-native";
 import { AntDesign, Feather } from "@expo/vector-icons";
 
-import { selectDisplayName, selectPhotoURL } from "../redux/selectors";
+import {
+  selectDisplayName,
+  selectPhotoURL,
+  selectPosts,
+} from "../redux/selectors";
 import { logout, uploadNewAvatar } from "../redux/operations";
 import getBlobFromUri from "../helpers/getBlobFromUri";
 import manageFileUpload from "../helpers/manageFileUpload";
@@ -24,7 +28,7 @@ const ProfileHeader = () => {
   const [image, setImage] = useState(null);
   const displayName = useSelector(selectDisplayName);
   const photoURL = useSelector(selectPhotoURL);
-
+  const posts = useSelector(selectPosts);
   const navigation = useNavigation();
   const dispatch = useDispatch();
 
@@ -117,6 +121,10 @@ const ProfileHeader = () => {
         </View>
         <Text style={styles.username}>{displayName}</Text>
       </View>
+
+      {posts.length === 0 && (
+        <Text style={styles.noPosts}>Your posts will be shown here</Text>
+      )}
     </View>
   );
 };
@@ -180,6 +188,10 @@ const styles = StyleSheet.create({
     fontSize: 30,
     fontWeight: "500",
     letterSpacing: 0.3,
+    textAlign: "center",
+  },
+  noPosts: {
+    backgroundColor: "#FFFFFF",
     textAlign: "center",
   },
 });
