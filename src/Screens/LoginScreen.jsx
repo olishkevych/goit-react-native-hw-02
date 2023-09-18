@@ -16,7 +16,6 @@ import {
 } from "react-native";
 import { login, resetAuthError } from "../redux/operations";
 import { selectAuthError, selectIsAuthorized } from "../redux/selectors";
-import { showAlert } from "../helpers/showAlert";
 
 import BackgroundImg from "../img/background.png";
 
@@ -27,11 +26,17 @@ const LoginScreen = () => {
   const [showEmailError, setShowEmailError] = useState(null);
   const [showPasswordError, setShowPasswordError] = useState(null);
   const [inputFocus, setInputFocus] = useState({});
-  const authError = useSelector(selectAuthError);
-  const isAuthorized = useSelector(selectIsAuthorized);
+  const [isAuthorized, setIsAuthorized] = useState(false);
+  const [authError, setAuthError] = useState({});
 
   const navigation = useNavigation();
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    if (isAuthorized) {
+      navigation.navigate("BottomNav", { screen: "Posts" });
+    }
+  }, [isAuthorized]);
 
   const managePasswordVisibility = () => {
     setHidePassword(!hidePassword);
@@ -69,21 +74,23 @@ const LoginScreen = () => {
     const isLoginValid = verifyLogin();
 
     if (isLoginValid) {
-      dispatch(login(userData));
-
-      if (!authError) {
-        setUserData({});
-        navigation.navigate("BottomNav", { screen: "Posts" });
-      }
-
-      if (authError) {
-        setShowLoginError(true);
-        return;
-      }
+      dispatch(login(userData))
+        .then((action) => {
+          if (action.error) {
+            throw new Error(action.payload);
+          }
+          if (!action.error) {
+            setUserData({});
+            setAuthError(null);
+            setIsAuthorized(true);
+          }
+        })
+        .catch((error) => setAuthError(error));
     }
   };
 
   const handleInputChange = (field, newText) => {
+    setAuthError(null);
     setUserData({ ...userData, [field]: newText });
     field === "email" ? setShowEmailError(null) : setShowPasswordError(null);
   };
@@ -169,8 +176,8 @@ const LoginScreen = () => {
                       <Text style={styles.hideBtnText}>Hide</Text>
                     )}
                   </TouchableOpacity>
-                  {showLoginError && !showEmailError && !showPasswordError && (
-                    <Text style={styles.loginError}>{authError}</Text>
+                  {authError && (
+                    <Text style={styles.loginError}>{authError.message}</Text>
                   )}
                 </View>
                 <Pressable

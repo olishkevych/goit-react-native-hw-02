@@ -23,7 +23,6 @@ import {
 import { addPost } from "../redux/operations";
 import manageFileUpload from "../helpers/manageFileUpload";
 import getBlobFromUri from "../helpers/getBlobFromUri";
-import { showAlert } from "../helpers/showAlert";
 import { selectUID } from "../redux/selectors";
 
 import { Feather } from "@expo/vector-icons";
@@ -96,7 +95,7 @@ const CreatePostsScreen = () => {
         await MediaLibrary.createAssetAsync(uri);
         setImgURI(uri);
       } catch (error) {
-        showAlert("Something went wrong. Try again");
+        console.log(error);
       }
     }
   };
@@ -109,7 +108,7 @@ const CreatePostsScreen = () => {
       };
       return coords;
     } catch (error) {
-      showAlert("Could not get location");
+      console.log(error);
     }
   };
 
