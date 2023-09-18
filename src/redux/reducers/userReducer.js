@@ -29,7 +29,6 @@ const userReducer = createSlice({
       })
       .addCase(register.fulfilled, (state, { payload }) => {
         const { email, displayName, photoURL, uid } = payload;
-        console.log("fulfilled");
         state.email = email;
         state.displayName = displayName;
         state.photoURL = photoURL;
@@ -39,8 +38,6 @@ const userReducer = createSlice({
         state.isLoading = false;
       })
       .addCase(register.rejected, (state, { payload }) => {
-        console.log("rejected");
-
         state.authError = payload;
         state.isAuthorized = false;
         state.isLoading = false;
