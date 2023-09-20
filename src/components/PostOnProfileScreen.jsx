@@ -6,6 +6,7 @@ import { Feather } from "@expo/vector-icons";
 const PostOnProfileScreen = ({ post }) => {
   const navigation = useNavigation();
   const { coords } = post;
+
   return (
     <View style={styles.post}>
       <Image style={styles.postImage} source={{ uri: post.image }} />

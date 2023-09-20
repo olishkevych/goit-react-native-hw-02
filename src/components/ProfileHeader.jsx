@@ -62,9 +62,6 @@ const ProfileHeader = () => {
 
   const handleLogout = () => {
     dispatch(logout());
-    navigation.navigate("Login", {
-      screen: "BottomNav",
-    });
   };
 
   return (

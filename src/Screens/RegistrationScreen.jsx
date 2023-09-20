@@ -280,6 +280,7 @@ const RegistrationScreen = () => {
                         handleInputChange("password", text)
                       }
                       defaultValue={userData.password}
+                      autoCapitalize="none"
                     ></TextInput>
                     {showPasswordError && (
                       <Text style={styles.fieldError}>{showPasswordError}</Text>

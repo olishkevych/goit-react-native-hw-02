@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import {
   TouchableOpacity,
   View,
@@ -14,15 +14,13 @@ import {
   Keyboard,
   Alert,
 } from "react-native";
-import { login, resetAuthError } from "../redux/operations";
-import { selectAuthError, selectIsAuthorized } from "../redux/selectors";
+import { login } from "../redux/operations";
 
 import BackgroundImg from "../img/background.png";
 
 const LoginScreen = () => {
   const [hidePassword, setHidePassword] = useState(true);
   const [userData, setUserData] = useState({});
-  const [showLoginError, setShowLoginError] = useState(false);
   const [showEmailError, setShowEmailError] = useState(null);
   const [showPasswordError, setShowPasswordError] = useState(null);
   const [inputFocus, setInputFocus] = useState({});
@@ -151,6 +149,7 @@ const LoginScreen = () => {
                   <TextInput
                     placeholder="Password"
                     secureTextEntry={hidePassword}
+                    autoCapitalize="none"
                     placeholderTextColor="#BDBDBD"
                     style={[
                       styles.input,
@@ -196,7 +195,7 @@ const LoginScreen = () => {
                       setUserData({});
                       setShowEmailError(null);
                       setShowPasswordError(null);
-                      setShowLoginError(false);
+
                       navigation.navigate("Registration");
                     }}
                   >

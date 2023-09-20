@@ -4,19 +4,13 @@ import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../redux/operations";
 
 import { Feather } from "@expo/vector-icons";
-import { selectIsAuthorized } from "../redux/selectors";
-import { useEffect } from "react";
 
 const HeaderNav = ({ title }) => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
-  const isAuthorized = useSelector(selectIsAuthorized);
 
   const handleLogout = () => {
     dispatch(logout());
-    navigation.navigate("Login", {
-      screen: "BottomNav",
-    });
   };
 
   return (

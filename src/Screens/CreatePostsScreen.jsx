@@ -23,7 +23,7 @@ import {
 import { addPost } from "../redux/operations";
 import manageFileUpload from "../helpers/manageFileUpload";
 import getBlobFromUri from "../helpers/getBlobFromUri";
-import { selectUID } from "../redux/selectors";
+import { selectDisplayName, selectUID } from "../redux/selectors";
 
 import { Feather } from "@expo/vector-icons";
 
@@ -36,6 +36,7 @@ const CreatePostsScreen = () => {
   const [isCameraActive, setIsCameraActive] = useState(true);
   const [type, setType] = useState(Camera.Constants.Type.back);
   const uid = useSelector(selectUID);
+  const displayName = useSelector(selectDisplayName);
 
   const dispatch = useDispatch();
   const navigation = useNavigation();
@@ -79,9 +80,11 @@ const CreatePostsScreen = () => {
       ...postData,
       coords,
       userID: uid,
-      likes: 0,
+      displayName: displayName,
+      likes: [],
       comments: [],
       image: imgURL,
+      timestamp: Date.now(),
     };
     dispatch(addPost(postToAdd));
   };

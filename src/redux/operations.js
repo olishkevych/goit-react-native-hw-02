@@ -22,7 +22,7 @@ export const addPost = createAsyncThunk(
   "posts/addPost",
   async (postData, thunkAPI) => {
     try {
-      const docRef = await addDoc(collection(db, "posts"), {
+      await addDoc(collection(db, "posts"), {
         ...postData,
       });
       const snapshot = await getDocs(collection(db, "posts"));
@@ -34,7 +34,9 @@ export const addPost = createAsyncThunk(
         comments: doc.data().comments,
         likes: doc.data().likes,
         userID: doc.data().userID,
+        displayName: doc.data().displayName,
         locationName: doc.data().locationName,
+        timestamp: doc.data().timestamp,
       }));
       const posts = allPosts.filter((post) => post.userID === postData.userID);
       return posts;
@@ -44,9 +46,9 @@ export const addPost = createAsyncThunk(
   }
 );
 
-export const getPosts = createAsyncThunk(
+export const getAllPosts = createAsyncThunk(
   "posts/getPosts",
-  async (uid, thunkAPI) => {
+  async (thunkAPI) => {
     try {
       const snapshot = await getDocs(collection(db, "posts"));
       const allPosts = snapshot.docs.map((doc) => ({
@@ -58,9 +60,14 @@ export const getPosts = createAsyncThunk(
         likes: doc.data().likes,
         userID: doc.data().userID,
         locationName: doc.data().locationName,
+        displayName: doc.data().displayName,
+        timestamp: doc.data().timestamp,
       }));
-      const posts = allPosts.filter((post) => post.userID === uid);
-      return posts;
+
+      const sortedPosts = allPosts.sort(
+        (a, b) => Number(b.timestamp) - Number(a.timestamp)
+      );
+      return sortedPosts;
     } catch (error) {
       return thunkAPI.rejectWithValue(error.message);
     }
@@ -78,6 +85,35 @@ export const addComment = createAsyncThunk(
       if (querySnapshot.exists()) {
         return { comments: querySnapshot.data().comments, postID };
       } else {
+        throw new Error("Something went wrong. Post not found");
+      }
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.message);
+    }
+  }
+);
+export const handleLike = createAsyncThunk(
+  "posts/handleLike",
+  async ({ uid, postID }, thunkAPI) => {
+    try {
+      const postRef = doc(db, "posts", postID);
+      const querySnapshot = await getDoc(postRef);
+
+      if (querySnapshot.exists()) {
+        const likesArray = querySnapshot.data().likes;
+        if (likesArray.includes(uid)) {
+          await updateDoc(postRef, {
+            likes: likesArray.filter((like) => like !== uid),
+          });
+          console.log("remove");
+        } else {
+          console.log("added");
+          await updateDoc(postRef, { likes: arrayUnion(uid) });
+        }
+
+        return { likes: querySnapshot.data().likes, postID };
+      } else {
+        console.log("error");
         throw new Error("Something went wrong. Post not found");
       }
     } catch (error) {
