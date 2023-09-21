@@ -2,10 +2,20 @@ import React from "react";
 import { useNavigation } from "@react-navigation/native";
 import { View, Text, Image, StyleSheet, Pressable } from "react-native";
 import { Feather } from "@expo/vector-icons";
+import { handleLike } from "../redux/operations";
+import { useDispatch, useSelector } from "react-redux";
+import { selectPosts, selectUID } from "../redux/selectors";
+import { useEffect } from "react";
 
 const PostOnProfileScreen = ({ post }) => {
+  const dispatch = useDispatch();
   const navigation = useNavigation();
+  const uid = useSelector(selectUID);
   const { coords } = post;
+
+  const handleLikePress = (uid, postID) => {
+    dispatch(handleLike({ uid, postID }));
+  };
 
   return (
     <View style={styles.post}>
@@ -29,13 +39,23 @@ const PostOnProfileScreen = ({ post }) => {
             <Text style={styles.commentsNumber}>{post.comments.length}</Text>
           </Pressable>
           <View style={styles.likesWrap}>
-            <Feather
-              name="thumbs-up"
-              size={22}
-              color="#FF6C00"
-              style={styles.likeIcon}
-            />
-            <Text style={styles.likesNumber}>{post.likes}</Text>
+            <Pressable
+              onPress={() => {
+                handleLikePress(uid, post.id);
+              }}
+              style={({ pressed }) => [
+                styles.likesWrap,
+                pressed && styles.pressedStyle,
+              ]}
+            >
+              <Feather
+                name="thumbs-up"
+                size={22}
+                color="#FF6C00"
+                style={styles.likeIcon}
+              />
+              <Text style={styles.likesNumber}>{post.likes.length}</Text>
+            </Pressable>
           </View>
         </View>
         <Pressable

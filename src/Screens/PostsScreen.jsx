@@ -9,7 +9,7 @@ import {
   selectPhotoURL,
   selectUID,
 } from "../redux/selectors";
-import { getAllPosts } from "../redux/operations";
+import { getAllPosts, handleLike } from "../redux/operations";
 import PostOnPostScr from "../components/PostOnPostScr";
 import userPic from "../img/userPic.jpg";
 
@@ -17,7 +17,6 @@ const PostsScreen = () => {
   const dispatch = useDispatch();
   const posts = useSelector(selectPosts);
   const displayName = useSelector(selectDisplayName);
-
   const email = useSelector(selectUserEmail);
   const photoURL = useSelector(selectPhotoURL);
   const uid = useSelector(selectUID);
@@ -45,7 +44,6 @@ const PostsScreen = () => {
         showsVerticalScrollIndicator={false}
         renderItem={({ item }) => <PostOnPostScr post={item} />}
         keyExtractor={(item) => item.id}
-        // ListHeaderComponent={NoPostsText}
       />
     </View>
   );
