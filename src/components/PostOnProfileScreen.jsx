@@ -12,6 +12,8 @@ const PostOnProfileScreen = ({ post }) => {
   const uid = useSelector(selectUID);
   const { coords } = post;
 
+  const userHasCommented = post.comments.find((comment) => comment.uid === uid);
+
   const handleLikePost = async () => {
     try {
       const docRef = doc(db, "posts", post.id);
@@ -49,7 +51,7 @@ const PostOnProfileScreen = ({ post }) => {
             <Feather
               name="message-circle"
               size={24}
-              color={post.comments.length > 0 ? "#FF6C00" : "#BDBDBD"}
+              color={userHasCommented ? "#FF6C00" : "#BDBDBD"}
               style={styles.commentIcon}
             />
             <Text style={styles.commentsNumber}>{post.comments.length}</Text>

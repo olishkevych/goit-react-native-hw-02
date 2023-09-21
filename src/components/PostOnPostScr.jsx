@@ -1,8 +1,8 @@
-import React, { memo } from "react";
+import React from "react";
 import { useNavigation } from "@react-navigation/native";
 import { useSelector } from "react-redux";
 import { selectUID } from "../redux/selectors";
-import { doc, updateDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../firebase/config";
 import { View, Text, Image, StyleSheet, Pressable } from "react-native";
 import { Feather } from "@expo/vector-icons";
@@ -11,6 +11,8 @@ const PostOnPostScr = ({ post }) => {
   const uid = useSelector(selectUID);
   const navigation = useNavigation();
   const { coords, locationName } = post;
+
+  const userHasCommented = post.comments.find((comment) => comment.uid === uid);
 
   const handleLikePost = async () => {
     try {
@@ -23,6 +25,7 @@ const PostOnPostScr = ({ post }) => {
         await updateDoc(docRef, {
           likes: [...filterArray],
         });
+
         return;
       }
       await updateDoc(docRef, {
@@ -52,10 +55,17 @@ const PostOnPostScr = ({ post }) => {
             <Feather
               name="message-circle"
               size={24}
-              color="#BDBDBD"
+              color={userHasCommented ? "#FF6C00" : "#BDBDBD"}
               style={styles.grayIcon}
             />
-            <Text style={styles.commentsNumber}>{post.comments.length}</Text>
+            <Text
+              style={[
+                styles.commentsNumber,
+                userHasCommented && styles.likesNumber,
+              ]}
+            >
+              {post.comments.length}
+            </Text>
           </Pressable>
           <Pressable
             onPress={handleLikePost}
@@ -138,4 +148,4 @@ const styles = StyleSheet.create({
   postData: { flexDirection: "row", justifyContent: "space-between" },
 });
 
-export default memo(PostOnPostScr);
+export default PostOnPostScr;
