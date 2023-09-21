@@ -1,23 +1,36 @@
-import React, { useEffect, useState } from "react";
+import React, { memo } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { View, Text, Image, StyleSheet, Pressable } from "react-native";
 import { Feather } from "@expo/vector-icons";
-import { useDispatch, useSelector } from "react-redux";
-import { selectPosts, selectUID } from "../redux/selectors";
-import { handleLike } from "../redux/operations";
+import { useSelector } from "react-redux";
+import { selectUID } from "../redux/selectors";
+import { doc, updateDoc } from "firebase/firestore";
+import { db } from "../firebase/config";
 
 const PostOnPostScr = ({ post }) => {
   const uid = useSelector(selectUID);
-  const dispatch = useDispatch();
   const navigation = useNavigation();
-  const [isLiked, setIsLiked] = useState(false);
   const { coords, locationName } = post;
 
-  useEffect(() => {}, [dispatch]);
+  const handleLikePost = async () => {
+    try {
+      const docRef = doc(db, "posts", post.id);
 
-  const handleLikePress = () => {
-    setIsLiked(!isLiked);
-    dispatch(handleLike({ uid, postID: post.id }));
+      const res = post.likes.some((el) => el == uid);
+
+      if (res) {
+        const filterArray = post.likes.filter((el) => el !== uid);
+        await updateDoc(docRef, {
+          likes: [...filterArray],
+        });
+        return;
+      }
+      await updateDoc(docRef, {
+        likes: [...post.likes, uid],
+      });
+    } catch (error) {
+      console.log("handleLikePost", error);
+    }
   };
 
   return (
@@ -45,9 +58,7 @@ const PostOnPostScr = ({ post }) => {
             <Text style={styles.commentsNumber}>{post.comments.length}</Text>
           </Pressable>
           <Pressable
-            onPress={() => {
-              handleLikePress(uid, post.id);
-            }}
+            onPress={handleLikePost}
             style={({ pressed }) => [
               styles.likesWrap,
               pressed && styles.pressedStyle,
@@ -127,4 +138,4 @@ const styles = StyleSheet.create({
   postData: { flexDirection: "row", justifyContent: "space-between" },
 });
 
-export default PostOnPostScr;
+export default memo(PostOnPostScr);

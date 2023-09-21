@@ -4,8 +4,9 @@ import { View, Text, Image, StyleSheet, Pressable } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { handleLike } from "../redux/operations";
 import { useDispatch, useSelector } from "react-redux";
-import { selectPosts, selectUID } from "../redux/selectors";
-import { useEffect } from "react";
+import { selectUID } from "../redux/selectors";
+import { doc, updateDoc } from "firebase/firestore";
+import { db } from "../firebase/config";
 
 const PostOnProfileScreen = ({ post }) => {
   const dispatch = useDispatch();
@@ -13,8 +14,25 @@ const PostOnProfileScreen = ({ post }) => {
   const uid = useSelector(selectUID);
   const { coords } = post;
 
-  const handleLikePress = (uid, postID) => {
-    dispatch(handleLike({ uid, postID }));
+  const handleLikePost = async () => {
+    try {
+      const docRef = doc(db, "posts", post.id);
+
+      const res = post.likes.some((el) => el == uid);
+
+      if (res) {
+        const filterArray = post.likes.filter((el) => el !== uid);
+        await updateDoc(docRef, {
+          likes: [...filterArray],
+        });
+        return;
+      }
+      await updateDoc(docRef, {
+        likes: [...post.likes, uid],
+      });
+    } catch (error) {
+      console.log("handleLikePost", error);
+    }
   };
 
   return (
@@ -33,16 +51,14 @@ const PostOnProfileScreen = ({ post }) => {
             <Feather
               name="message-circle"
               size={24}
-              color="#FF6C00"
+              color={post.comments.length > 0 ? "#FF6C00" : "#BDBDBD"}
               style={styles.commentIcon}
             />
             <Text style={styles.commentsNumber}>{post.comments.length}</Text>
           </Pressable>
           <View style={styles.likesWrap}>
             <Pressable
-              onPress={() => {
-                handleLikePress(uid, post.id);
-              }}
+              onPress={handleLikePost}
               style={({ pressed }) => [
                 styles.likesWrap,
                 pressed && styles.pressedStyle,
@@ -51,7 +67,7 @@ const PostOnProfileScreen = ({ post }) => {
               <Feather
                 name="thumbs-up"
                 size={22}
-                color="#FF6C00"
+                color={post.likes.includes(uid) ? "#FF6C00" : "#BDBDBD"}
                 style={styles.likeIcon}
               />
               <Text style={styles.likesNumber}>{post.likes.length}</Text>

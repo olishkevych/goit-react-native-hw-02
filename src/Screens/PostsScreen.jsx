@@ -9,7 +9,7 @@ import {
   selectPhotoURL,
   selectUID,
 } from "../redux/selectors";
-import { getAllPosts, handleLike } from "../redux/operations";
+import { getAllPosts } from "../redux/operations";
 import PostOnPostScr from "../components/PostOnPostScr";
 import userPic from "../img/userPic.jpg";
 
@@ -23,7 +23,7 @@ const PostsScreen = () => {
 
   useEffect(() => {
     dispatch(getAllPosts(uid));
-  }, [dispatch, uid, posts]);
+  }, [uid, posts]);
 
   return (
     <View style={styles.container}>
@@ -41,6 +41,7 @@ const PostsScreen = () => {
 
       <FlatList
         data={posts}
+        extraData={posts}
         showsVerticalScrollIndicator={false}
         renderItem={({ item }) => <PostOnPostScr post={item} />}
         keyExtractor={(item) => item.id}
