@@ -1,11 +1,11 @@
 import React, { memo } from "react";
 import { useNavigation } from "@react-navigation/native";
-import { View, Text, Image, StyleSheet, Pressable } from "react-native";
-import { Feather } from "@expo/vector-icons";
 import { useSelector } from "react-redux";
 import { selectUID } from "../redux/selectors";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../firebase/config";
+import { View, Text, Image, StyleSheet, Pressable } from "react-native";
+import { Feather } from "@expo/vector-icons";
 
 const PostOnPostScr = ({ post }) => {
   const uid = useSelector(selectUID);

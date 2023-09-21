@@ -29,7 +29,6 @@ const ProfileHeader = () => {
   const displayName = useSelector(selectDisplayName);
   const photoURL = useSelector(selectPhotoURL);
   const posts = useSelector(selectPosts);
-  const navigation = useNavigation();
   const dispatch = useDispatch();
 
   const pickImage = async () => {

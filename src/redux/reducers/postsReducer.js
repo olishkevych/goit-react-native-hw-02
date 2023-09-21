@@ -52,21 +52,6 @@ const postsReducer = createSlice({
       .addCase(addComment.rejected, (state, { payload }) => {
         state.error = payload;
         state.isLoading = false;
-      })
-      .addCase(handleLike.pending, (state) => {
-        state.error = null;
-        state.isLoading = true;
-      })
-      .addCase(handleLike.fulfilled, (state, { payload }) => {
-        const { likes, postID } = payload;
-        state.error = null;
-        state.isLoading = true;
-        const updatedPost = state.posts.find((post) => post.id === postID);
-        updatedPost.likes = likes;
-      })
-      .addCase(handleLike.rejected, (state, { payload }) => {
-        state.error = payload;
-        state.isLoading = false;
       });
   },
 });

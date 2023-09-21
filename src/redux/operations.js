@@ -74,36 +74,6 @@ export const getAllPosts = createAsyncThunk(
   }
 );
 
-export const getOnePost = createAsyncThunk(
-  "posts/getOnePost",
-  async ({ postID }, thunkAPI) => {
-    try {
-      const docRef = doc(db, "posts", postID);
-      const docSnap = await getDoc(docRef);
-
-      if (docSnap.exists()) {
-        const post = {
-          id: docSnap.id,
-          image: docSnap.data().image,
-          title: docSnap.data().title,
-          coords: docSnap.data().coords,
-          comments: docSnap.data().comments,
-          likes: docSnap.data().likes,
-          userID: docSnap.data().userID,
-          locationName: docSnap.data().locationName,
-          displayName: docSnap.data().displayName,
-          timestamp: docSnap.data().timestamp,
-        };
-        return post;
-      } else {
-        throw new Error("No post with this ID");
-      }
-    } catch (error) {
-      return thunkAPI.rejectWithValue(error.message);
-    }
-  }
-);
-
 export const addComment = createAsyncThunk(
   "posts/addComment",
   async ({ comment, postID }, thunkAPI) => {
@@ -115,35 +85,6 @@ export const addComment = createAsyncThunk(
       if (querySnapshot.exists()) {
         return { comments: querySnapshot.data().comments, postID };
       } else {
-        throw new Error("Something went wrong. Post not found");
-      }
-    } catch (error) {
-      return thunkAPI.rejectWithValue(error.message);
-    }
-  }
-);
-export const handleLike = createAsyncThunk(
-  "posts/handleLike",
-  async ({ uid, postID }, thunkAPI) => {
-    try {
-      const postRef = doc(db, "posts", postID);
-      const querySnapshot = await getDoc(postRef);
-
-      if (querySnapshot.exists()) {
-        const likesArray = querySnapshot.data().likes;
-        if (likesArray.includes(uid)) {
-          await updateDoc(postRef, {
-            likes: likesArray.filter((like) => like !== uid),
-          });
-          console.log("remove");
-        } else {
-          console.log("added");
-          await updateDoc(postRef, { likes: arrayUnion(uid) });
-        }
-
-        return { likes: querySnapshot.data().likes, postID };
-      } else {
-        console.log("error");
         throw new Error("Something went wrong. Post not found");
       }
     } catch (error) {

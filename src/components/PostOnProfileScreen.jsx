@@ -1,15 +1,13 @@
 import React from "react";
 import { useNavigation } from "@react-navigation/native";
-import { View, Text, Image, StyleSheet, Pressable } from "react-native";
-import { Feather } from "@expo/vector-icons";
-import { handleLike } from "../redux/operations";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { selectUID } from "../redux/selectors";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../firebase/config";
+import { View, Text, Image, StyleSheet, Pressable } from "react-native";
+import { Feather } from "@expo/vector-icons";
 
 const PostOnProfileScreen = ({ post }) => {
-  const dispatch = useDispatch();
   const navigation = useNavigation();
   const uid = useSelector(selectUID);
   const { coords } = post;
@@ -75,7 +73,7 @@ const PostOnProfileScreen = ({ post }) => {
           </View>
         </View>
         <Pressable
-          onPress={(post) => navigation.navigate("Map", { coords: coords })}
+          onPress={() => navigation.navigate("Map", { coords: coords })}
           style={({ pressed }) => [
             styles.locationWrap,
             pressed && styles.pressedStyle,

@@ -23,7 +23,7 @@ const PostsScreen = () => {
 
   useEffect(() => {
     dispatch(getAllPosts(uid));
-  }, [uid, posts]);
+  }, [dispatch, uid, posts]);
 
   return (
     <View style={styles.container}>
